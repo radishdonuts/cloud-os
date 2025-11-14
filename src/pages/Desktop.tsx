@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Dock } from '../components/desktop/Dock';
 import { SystemTray } from '../components/desktop/SystemTray';
 import { AppIcon } from '../components/desktop/AppIcon';
@@ -12,17 +12,19 @@ export interface DesktopProps {
   onQuickSettingsOpen: () => void;
   onNotificationsOpen: () => void;
   trashCount?: number;
+  maximizedApp?: string | null;
 }
 export function Desktop({
   currentUser,
   onAppOpen,
   onQuickSettingsOpen,
   onNotificationsOpen,
-  trashCount = 0
+  trashCount = 0,
+  maximizedApp = null
 }: DesktopProps) {
   // Generate desktop apps based on user data
   const desktopApps = currentUser.desktopApps.map(app => {
-    let icon = FolderIcon;
+    let icon: React.ComponentType<{ size?: string | number; className?: string }> = FolderIcon;
     let action = () => onAppOpen('files-documents');
     let emoji: string | undefined;
     let image: string | undefined = app.image;
@@ -49,12 +51,11 @@ export function Desktop({
 
     if (app.name.toLowerCase().includes('note')) {
       emoji = '📝';
-      icon = undefined as any;
     }
 
     return {
       name: app.name,
-      icon: emoji || image ? undefined : icon,
+      icon: emoji || image ? FolderIcon : icon,
       emoji: emoji,
       image: image,
       action
@@ -79,7 +80,7 @@ export function Desktop({
       </div>
 
       {/* System Tray */}
-      <SystemTray onQuickSettingsClick={onQuickSettingsOpen} onNotificationsClick={onNotificationsOpen} notificationCount={3} />
+      <SystemTray onQuickSettingsClick={onQuickSettingsOpen} onNotificationsClick={onNotificationsOpen} notificationCount={3} maximizedApp={maximizedApp} />
 
       {/* Dock */}
       <Dock onAppClick={onAppOpen} trashCount={trashCount} />

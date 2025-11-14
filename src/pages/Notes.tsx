@@ -8,6 +8,9 @@ export interface NotesProps {
   onClose: () => void;
   initialContent?: string;
   initialTitle?: string;
+  onMinimize?: () => void;
+  onMaximize?: () => void;
+  maximized?: boolean;
 }
 interface Note {
   id: string;
@@ -18,7 +21,10 @@ interface Note {
 export function Notes({
   onClose,
   initialContent = '',
-  initialTitle = 'Untitled'
+  initialTitle = 'Untitled',
+  onMinimize,
+  onMaximize,
+  maximized = false
 }: NotesProps) {
   const [notes, setNotes] = useState<Note[]>([{
     id: '1',
@@ -79,7 +85,7 @@ export function Notes({
     setNotes(notes.map(n => n.id === selectedNote.id ? updatedNote : n));
   };
   return <div className="fixed inset-0 z-40 flex items-center justify-center p-6 bg-black/20 backdrop-blur-sm animate-fade-in">
-      <Window title="Notes" onClose={onClose} onMinimize={() => {}} onMaximize={() => {}} width="w-full max-w-6xl" height="h-[85vh]">
+      <Window title="Notes" onClose={onClose} onMinimize={onMinimize} onMaximize={onMaximize} maximized={maximized} width="w-full max-w-6xl" height="h-[85vh]">
         <div className="flex h-full">
           {/* Sidebar */}
           <div className="w-64 border-r border-cloud-gray/20 dark:border-dark-border p-4 flex flex-col">

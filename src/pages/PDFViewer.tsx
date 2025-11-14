@@ -4,13 +4,19 @@ import { FileTextIcon } from 'lucide-react';
 export interface PDFViewerProps {
   onClose: () => void;
   fileName: string;
+  onMinimize?: () => void;
+  onMaximize?: () => void;
+  maximized?: boolean;
 }
 export function PDFViewer({
   onClose,
-  fileName
+  fileName,
+  onMinimize,
+  onMaximize,
+  maximized = false
 }: PDFViewerProps) {
   return <div className="fixed inset-0 z-40 flex items-center justify-center p-6 bg-black/20 backdrop-blur-sm animate-fade-in">
-      <Window title={fileName} onClose={onClose} width="w-full max-w-4xl" height="h-[85vh]">
+      <Window title={fileName} onClose={onClose} onMinimize={onMinimize} onMaximize={onMaximize} maximized={maximized} width="w-full max-w-4xl" height="h-[85vh]">
         <div className="h-full flex flex-col items-center justify-center bg-cloud-gray/10 dark:bg-dark-bg-lighter/30">
           <div className="text-center">
             <div className="w-32 h-32 mx-auto mb-6 rounded-cloud-xl bg-red-500/20 flex items-center justify-center">

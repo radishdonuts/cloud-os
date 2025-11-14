@@ -6,12 +6,20 @@ import { Input } from '../components/ui/Input';
 import { SearchIcon, StarIcon, DownloadIcon } from 'lucide-react';
 export interface AppStoreProps {
   onClose: () => void;
+  onMinimize?: () => void;
+  onMaximize?: () => void;
+  maximized?: boolean;
 }
 export function AppStore({
-  onClose
+  onClose,
+  onMinimize,
+  onMaximize,
+  maximized = false
 }: AppStoreProps) {
   const [selectedCategory, setSelectedCategory] = useState('featured');
   const [searchQuery, setSearchQuery] = useState('');
+  const [installed, setInstalled] = useState<Record<string, boolean>>({});
+  const [confirmBuy, setConfirmBuy] = useState<null | { appName: string; price: string }>(null);
   const categories = [{
     id: 'featured',
     label: 'Featured'
@@ -201,8 +209,13 @@ export function AppStore({
   };
   const apps = appsByCategory[selectedCategory] || [];
   const filteredApps = apps.filter(app => app.name.toLowerCase().includes(searchQuery.toLowerCase()) || app.category.toLowerCase().includes(searchQuery.toLowerCase()));
+  const formatPrice = (p: string) => {
+    if (!p) return p;
+    if (p.startsWith('$')) return '₱' + p.slice(1);
+    return p.replace('$', '₱');
+  };
   return <div className="fixed inset-0 z-40 flex items-center justify-center p-6 bg-black/20 backdrop-blur-sm animate-fade-in">
-      <Window title="App Store" onClose={onClose} width="w-full max-w-6xl" height="h-[85vh]">
+      <Window title="App Store" onClose={onClose} onMinimize={onMinimize} onMaximize={onMaximize} maximized={maximized} width="w-full max-w-6xl" height="h-[85vh]">
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="px-6 py-4 border-b border-cloud-gray/20 dark:border-dark-border">
@@ -264,13 +277,31 @@ export function AppStore({
 
                     <div className="flex items-center justify-between">
                       <span className="text-lg font-bold text-cloud-green">
-                        {app.price}
+                        {formatPrice(app.price)}
                       </span>
-                      <Button variant="primary" size="sm">
-                        {app.price === 'Free' ? 'Get' : 'Buy'}
-                      </Button>
+                      {!installed[app.name] ? (
+                        <>{app.price === 'Free' ? <Button variant="primary" size="sm" onClick={() => setInstalled(prev => ({ ...prev, [app.name]: true }))}>Get</Button> : <Button variant="primary" size="sm" onClick={() => setConfirmBuy({ appName: app.name, price: app.price })}>Buy</Button>}</>
+                      ) : (
+                        <Button variant="secondary" size="sm" disabled>Installed</Button>
+                      )}
                     </div>
                   </Card>)}
+        {confirmBuy && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setConfirmBuy(null)}>
+            <div className="w-full max-w-md" onClick={e => e.stopPropagation()}>
+              <Window title={`Buy ${confirmBuy.appName}`} onClose={() => setConfirmBuy(null)} width="w-full" height="h-auto">
+                <div className="p-4">
+                  <p className="mb-4">Buy <strong>{confirmBuy.appName}</strong> for <strong>{formatPrice(confirmBuy.price)}</strong>?</p>
+                  <div className="flex gap-3 justify-end">
+                    <Button variant="ghost" onClick={() => setConfirmBuy(null)}>Cancel</Button>
+                    <Button variant="primary" onClick={() => {
+                      setInstalled(prev => ({ ...prev, [confirmBuy.appName]: true }));
+                      setConfirmBuy(null);
+                    }}>Buy</Button>
+                  </div>
+                </div>
+              </Window>
+            </div>
+          </div>}
               </div>}
           </div>
         </div>

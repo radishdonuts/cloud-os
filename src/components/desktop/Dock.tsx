@@ -1,6 +1,6 @@
 import React from 'react';
 import { CloudIcon } from '../ui/CloudIcon';
-import { FolderIcon, ImageIcon, SettingsIcon, Grid3x3Icon, MonitorIcon, CpuIcon, HardDriveIcon, ShoppingBagIcon, TrashIcon, FileTextIcon } from 'lucide-react';
+import { FolderIcon, ImageIcon, SettingsIcon, Grid3x3Icon, MonitorIcon, CpuIcon, HardDriveIcon, ShoppingBagIcon, TrashIcon, FileTextIcon, CodeIcon } from 'lucide-react';
 export interface DockProps {
   onAppClick: (app: string) => void;
   activeApp?: string;
@@ -48,7 +48,12 @@ export function Dock({
     id: 'app-store',
     name: 'App Store',
     icon: ShoppingBagIcon
-  }];
+  }, {
+    id: 'terminal',
+    name: 'Terminal',
+    icon: CodeIcon
+  }
+  ];
   return <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-slide-up">
       <div className="bg-white/60 dark:bg-dark-bg-light/60 backdrop-blur-cloud rounded-cloud-xl shadow-cloud-lg border border-cloud-gray/30 dark:border-dark-border px-3 py-3 flex items-center gap-2">
         {/* Cloud Launcher */}

@@ -5,6 +5,9 @@ import { Button } from '../components/ui/Button';
 import { CpuIcon, MonitorIcon, MemoryStickIcon, WifiIcon, BluetoothIcon, UsbIcon, HardDriveIcon, CheckCircleIcon, AlertCircleIcon, XCircleIcon } from 'lucide-react';
 export interface DeviceManagerProps {
   onClose: () => void;
+  onMinimize?: () => void;
+  onMaximize?: () => void;
+  maximized?: boolean;
 }
 type DeviceStatus = 'working' | 'warning' | 'error' | 'disabled';
 interface Device {
@@ -16,7 +19,10 @@ interface Device {
   details: string;
 }
 export function DeviceManager({
-  onClose
+  onClose,
+  onMinimize,
+  onMaximize,
+  maximized = false
 }: DeviceManagerProps) {
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
   const [showBluetoothPairing, setShowBluetoothPairing] = useState(false);
@@ -304,7 +310,7 @@ export function DeviceManager({
       </div>;
   }
   return <div className="fixed inset-0 z-40 flex items-center justify-center p-6 bg-black/20 backdrop-blur-sm animate-fade-in">
-      <Window title="Device Manager" onClose={onClose} width="w-full max-w-5xl" height="h-[85vh]">
+      <Window title="Device Manager" onClose={onClose} onMinimize={onMinimize} onMaximize={onMaximize} maximized={maximized} width="w-full max-w-5xl" height="h-[85vh]">
         <div className="p-6 space-y-6 overflow-auto h-full">
           <div className="flex items-center justify-between mb-6">
             <div>

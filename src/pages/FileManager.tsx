@@ -3,9 +3,14 @@ import { Window } from '../components/layout/Window';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
-import { FolderIcon, FileTextIcon, ImageIcon, VideoIcon, MusicIcon, HomeIcon, DownloadIcon, CloudIcon, UsbIcon, ChevronRightIcon, Grid3x3Icon, ListIcon, SearchIcon, ChevronLeftIcon, PlusIcon, TrashIcon, Edit2Icon, FolderPlusIcon, FilePlusIcon } from 'lucide-react';
+import { Trash } from './Trash';
+import { FolderIcon, FileTextIcon, ImageIcon, VideoIcon, MusicIcon, HomeIcon, DownloadIcon, CloudIcon, UsbIcon, ChevronRightIcon, Grid3x3Icon, ListIcon, SearchIcon, ChevronLeftIcon, TrashIcon, Edit2Icon, FolderPlusIcon, FilePlusIcon } from 'lucide-react';
+
 export interface FileManagerProps {
   onClose: () => void;
+  onMinimize?: () => void;
+  onMaximize?: () => void;
+  maximized?: boolean;
   initialCategory?: Category;
   initialPath?: string[];
   onOpenPhoto?: (folder: string) => void;
@@ -13,7 +18,12 @@ export interface FileManagerProps {
   onOpenPDF?: (fileName: string) => void;
   onOpenDocument?: (fileName: string) => void;
 }
+
+// Export top-level roots so other components (Terminal) can reference available directories
+export const FILE_MANAGER_ROOTS = ['Desktop', 'Documents', 'Pictures', 'Downloads', 'Music', 'Videos', 'Home'];
+
 type Category = 'home' | 'desktop' | 'documents' | 'pictures' | 'downloads' | 'cloud' | 'usb' | 'trash';
+
 interface FileItem {
   name: string;
   type: 'folder' | 'pdf' | 'image' | 'video' | 'music' | 'text' | 'keynote' | 'doc';
@@ -23,13 +33,18 @@ interface FileItem {
   synced: boolean;
   linkedCategory?: Category;
 }
+
 interface ContextMenu {
   x: number;
   y: number;
   file?: FileItem;
 }
+
 export function FileManager({
   onClose,
+  onMinimize,
+  onMaximize,
+  maximized = false,
   initialCategory = 'home',
   initialPath = [],
   onOpenPhoto,
@@ -39,6 +54,7 @@ export function FileManager({
 }: FileManagerProps) {
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [selectedCategory, setSelectedCategory] = useState<Category>(initialCategory);
+  const [showTrashPage, setShowTrashPage] = useState(false);
   const [currentPath, setCurrentPath] = useState<string[]>(initialPath);
   const [history, setHistory] = useState<{
     category: Category;
@@ -328,6 +344,7 @@ export function FileManager({
       '': []
     }
   });
+
   const categories = [{
     id: 'home' as Category,
     label: 'Home',
@@ -361,12 +378,19 @@ export function FileManager({
     label: 'Trash',
     icon: TrashIcon
   }];
+
   const getCurrentFiles = (): FileItem[] => {
     const pathKey = currentPath.join('/');
     return files[selectedCategory]?.[pathKey] || [];
   };
+
   const filteredFiles = getCurrentFiles().filter(file => file.name.toLowerCase().includes(searchQuery.toLowerCase()));
+
   const handleCategoryChange = (category: Category) => {
+    if (category === 'trash') {
+      setShowTrashPage(true);
+      return;
+    }
     const newHistory = history.slice(0, historyIndex + 1);
     newHistory.push({
       category: selectedCategory,
@@ -378,6 +402,7 @@ export function FileManager({
     setCurrentPath([]);
     setSearchQuery('');
   };
+
   const handleFileClick = (file: FileItem) => {
     if (file.type === 'folder') {
       if (file.linkedCategory) {
@@ -411,6 +436,7 @@ export function FileManager({
       onOpenDocument(file.name);
     }
   };
+
   const handleContextMenu = (e: React.MouseEvent, file?: FileItem) => {
     e.preventDefault();
     setContextMenu({
@@ -419,6 +445,7 @@ export function FileManager({
       file
     });
   };
+
   const handleCreateFolder = () => {
     const pathKey = currentPath.join('/');
     const newFolder: FileItem = {
@@ -437,6 +464,7 @@ export function FileManager({
     });
     setContextMenu(null);
   };
+
   const handleCreateFile = () => {
     const pathKey = currentPath.join('/');
     const newFile: FileItem = {
@@ -455,6 +483,7 @@ export function FileManager({
     });
     setContextMenu(null);
   };
+
   const handleDelete = (file: FileItem) => {
     const pathKey = currentPath.join('/');
     const currentFiles = files[selectedCategory][pathKey] || [];
@@ -473,11 +502,13 @@ export function FileManager({
     });
     setContextMenu(null);
   };
+
   const handleRename = (file: FileItem) => {
     setRenamingFile(file.name);
     setNewName(file.name);
     setContextMenu(null);
   };
+
   const handleRenameSubmit = (oldName: string) => {
     if (!newName || newName === oldName) {
       setRenamingFile(null);
@@ -498,6 +529,7 @@ export function FileManager({
     });
     setRenamingFile(null);
   };
+
   const handleBack = () => {
     if (historyIndex > 0) {
       const prevState = history[historyIndex - 1];
@@ -506,6 +538,7 @@ export function FileManager({
       setHistoryIndex(historyIndex - 1);
     }
   };
+
   const handleForward = () => {
     if (historyIndex < history.length - 1) {
       const nextState = history[historyIndex + 1];
@@ -514,6 +547,7 @@ export function FileManager({
       setHistoryIndex(historyIndex + 1);
     }
   };
+
   const handleBreadcrumbClick = (index: number) => {
     if (index === -1) {
       const newHistory = history.slice(0, historyIndex + 1);
@@ -535,29 +569,58 @@ export function FileManager({
       setCurrentPath(currentPath.slice(0, index + 1));
     }
   };
+
   const CategoryIcon = categories.find(c => c.id === selectedCategory)?.icon || HomeIcon;
   const trashCount = files.trash['']?.length || 0;
-  return <div className="fixed inset-0 z-40 flex items-center justify-center p-6 bg-black/20 backdrop-blur-sm animate-fade-in" onClick={() => setContextMenu(null)}>
-      <Window title="Files" onClose={onClose} width="w-full max-w-6xl" height="h-[80vh]">
+
+  if (showTrashPage) {
+    return (
+      <Trash
+        onClose={() => setShowTrashPage(false)}
+        onMaximize={onMaximize}
+        maximized={maximized}
+        initialItems={(files.trash[''] || []).map((item, idx) => ({
+          id: String(idx),
+          name: item.name,
+          type: item.type,
+        }))}
+      />
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 z-40 flex items-center justify-center p-6 bg-black/20 backdrop-blur-sm animate-fade-in" onClick={() => setContextMenu(null)}>
+      <Window title="Files" onClose={onClose} onMinimize={onMinimize} onMaximize={onMaximize} maximized={maximized} width="w-full max-w-6xl" height="h-[80vh]">
         <div className="flex h-full">
           {/* Sidebar */}
           <div className="w-64 border-r border-cloud-gray/20 dark:border-dark-border p-4 space-y-2">
             {categories.map(cat => {
-            const Icon = cat.icon;
-            const isTrash = cat.id === 'trash';
-            return <button key={cat.id} onClick={() => handleCategoryChange(cat.id)} className={`
+              const Icon = cat.icon;
+              const isTrash = cat.id === 'trash';
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => {
+                    if (isTrash) setShowTrashPage(true);
+                    else handleCategoryChange(cat.id);
+                  }}
+                  className={`
                     w-full flex items-center justify-between gap-3 px-4 py-3 rounded-cloud-lg transition-all duration-200
-                    ${selectedCategory === cat.id ? 'bg-cloud-green/20 text-cloud-green' : 'text-cloud-gray-dark dark:text-dark-text-muted hover:bg-cloud-gray/20 dark:hover:bg-dark-bg-lighter'}
-                  `}>
+                    ${selectedCategory === cat.id && !isTrash ? 'bg-cloud-green/20 text-cloud-green' : 'text-cloud-gray-dark dark:text-dark-text-muted hover:bg-cloud-gray/20 dark:hover:bg-dark-bg-lighter'}
+                  `}
+                >
                   <div className="flex items-center gap-3">
                     <Icon size={20} />
                     <span className="font-medium">{cat.label}</span>
                   </div>
-                  {isTrash && trashCount > 0 && <span className="px-2 py-1 bg-red-500/20 text-red-500 text-xs font-medium rounded-full">
+                  {isTrash && trashCount > 0 && (
+                    <span className="px-2 py-1 bg-red-500/20 text-red-500 text-xs font-medium rounded-full">
                       {trashCount}
-                    </span>}
-                </button>;
-          })}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
 
           {/* Main Content */}
@@ -578,12 +641,14 @@ export function FileManager({
                 <button onClick={() => handleBreadcrumbClick(-1)} className="hover:text-cloud-green transition-colors">
                   {categories.find(c => c.id === selectedCategory)?.label}
                 </button>
-                {currentPath.map((folder, i) => <Fragment key={i}>
+                {currentPath.map((folder, i) => (
+                  <Fragment key={i}>
                     <ChevronRightIcon size={16} />
                     <button onClick={() => handleBreadcrumbClick(i)} className={`hover:text-cloud-green transition-colors ${i === currentPath.length - 1 ? 'font-medium text-cloud-gray-deeper dark:text-dark-text' : ''}`}>
                       {folder}
                     </button>
-                  </Fragment>)}
+                  </Fragment>
+                ))}
               </div>
 
               <div className="relative w-64">
@@ -603,7 +668,8 @@ export function FileManager({
 
             {/* Files Grid/List */}
             <div className="flex-1 overflow-auto p-6" onContextMenu={e => handleContextMenu(e)}>
-              {filteredFiles.length === 0 ? <div className="flex flex-col items-center justify-center h-full text-center">
+              {filteredFiles.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-center">
                   <FolderIcon size={64} className="text-cloud-gray-dark mb-4 opacity-50" />
                   <p className="text-lg font-medium text-cloud-gray-deeper dark:text-dark-text mb-2">
                     {searchQuery ? 'No files found' : 'This folder is empty'}
@@ -611,85 +677,175 @@ export function FileManager({
                   <p className="text-sm text-cloud-gray-dark dark:text-dark-text-muted mb-4">
                     {searchQuery ? 'Try a different search term' : 'Right-click to create files or folders'}
                   </p>
-                </div> : view === 'grid' ? <div className="grid grid-cols-4 gap-4">
-                  {filteredFiles.map((file, i) => <Card key={i} hover className="p-4 cursor-pointer" onClick={() => handleFileClick(file)} onContextMenu={e => handleContextMenu(e, file)}>
-                      <div className="flex flex-col items-center text-center">
-                        {renamingFile === file.name ? <Input value={newName} onChange={e => setNewName(e.target.value)} onBlur={() => handleRenameSubmit(file.name)} onKeyDown={e => {
-                    if (e.key === 'Enter') handleRenameSubmit(file.name);
-                    if (e.key === 'Escape') setRenamingFile(null);
-                  }} autoFocus className="mb-3 text-center" onClick={e => e.stopPropagation()} /> : <>
-                            <div className="w-16 h-16 rounded-cloud-lg bg-cloud-green/20 flex items-center justify-center mb-3">
-                              {file.type === 'folder' ? <FolderIcon size={32} className="text-cloud-green" /> : file.type === 'pdf' ? <FileTextIcon size={32} className="text-red-500" /> : file.type === 'doc' ? <FileTextIcon size={32} className="text-blue-500" /> : file.type === 'image' ? <ImageIcon size={32} className="text-cloud-pink" /> : file.type === 'video' ? <VideoIcon size={32} className="text-cloud-purple" /> : file.type === 'music' ? <MusicIcon size={32} className="text-cloud-blue" /> : <FileTextIcon size={32} className="text-cloud-blue" />}
-                            </div>
-                            <p className="font-medium text-cloud-gray-deeper dark:text-dark-text text-sm mb-1 line-clamp-2">
-                              {file.name}
-                            </p>
-                          </>}
-                        <div className="flex items-center gap-2 text-xs text-cloud-gray-dark dark:text-dark-text-muted">
-                          <span>
-                            {file.type === 'folder' ? `${file.items} items` : file.size}
-                          </span>
-                          {file.synced && <CloudIcon size={12} className="text-cloud-green" />}
+                </div>
+              ) : view === 'grid' ? (
+                <div className="grid grid-cols-4 gap-4">
+                  {filteredFiles.map((file, i) => (
+                    <div key={i} onContextMenu={(e: React.MouseEvent) => handleContextMenu(e, file)}>
+                      <Card hover className="p-4 cursor-pointer" onClick={() => handleFileClick(file)}>
+                        <div className="flex flex-col items-center text-center">
+                          {renamingFile === file.name ? (
+                            <Input
+                              value={newName}
+                              onChange={e => setNewName(e.target.value)}
+                              onBlur={() => handleRenameSubmit(file.name)}
+                              onKeyDown={e => {
+                                if (e.key === 'Enter') handleRenameSubmit(file.name);
+                                if (e.key === 'Escape') setRenamingFile(null);
+                              }}
+                              autoFocus
+                              className="mb-3 text-center"
+                              onClick={e => e.stopPropagation()}
+                            />
+                          ) : (
+                            <>
+                              <div className="w-16 h-16 rounded-cloud-lg bg-cloud-green/20 flex items-center justify-center mb-3">
+                                {file.type === 'folder' ? (
+                                  <FolderIcon size={32} className="text-cloud-green" />
+                                ) : file.type === 'pdf' ? (
+                                  <FileTextIcon size={32} className="text-red-500" />
+                                ) : file.type === 'doc' ? (
+                                  <FileTextIcon size={32} className="text-blue-500" />
+                                ) : file.type === 'image' ? (
+                                  <ImageIcon size={32} className="text-cloud-pink" />
+                                ) : file.type === 'video' ? (
+                                  <VideoIcon size={32} className="text-cloud-purple" />
+                                ) : file.type === 'music' ? (
+                                  <MusicIcon size={32} className="text-cloud-blue" />
+                                ) : (
+                                  <FileTextIcon size={32} className="text-cloud-blue" />
+                                )}
+                              </div>
+                              <p className="font-medium text-cloud-gray-deeper dark:text-dark-text text-sm mb-1 line-clamp-2">
+                                {file.name}
+                              </p>
+                            </>
+                          )}
+                          <div className="flex items-center gap-2 text-xs text-cloud-gray-dark dark:text-dark-text-muted">
+                            <span>
+                              {file.type === 'folder' ? `${file.items} items` : file.size}
+                            </span>
+                            {file.synced && <CloudIcon size={12} className="text-cloud-green" />}
+                          </div>
                         </div>
-                      </div>
-                    </Card>)}
-                </div> : <div className="space-y-2">
-                  {filteredFiles.map((file, i) => <div key={i} onClick={() => handleFileClick(file)} onContextMenu={e => handleContextMenu(e, file)} className="flex items-center gap-4 px-4 py-3 bg-white/50 dark:bg-dark-bg-lighter/50 hover:bg-white dark:hover:bg-dark-bg-lighter rounded-cloud-lg transition-colors cursor-pointer">
+                      </Card>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {filteredFiles.map((file, i) => (
+                    <div
+                      key={i}
+                      onClick={() => handleFileClick(file)}
+                      onContextMenu={(e: React.MouseEvent) => handleContextMenu(e, file)}
+                      className="flex items-center gap-4 px-4 py-3 bg-white/50 dark:bg-dark-bg-lighter/50 hover:bg-white dark:hover:bg-dark-bg-lighter rounded-cloud-lg transition-colors cursor-pointer"
+                    >
                       <div className="w-10 h-10 rounded-cloud bg-cloud-green/20 flex items-center justify-center">
-                        {file.type === 'folder' ? <FolderIcon size={20} className="text-cloud-green" /> : file.type === 'image' ? <ImageIcon size={20} className="text-cloud-pink" /> : file.type === 'pdf' ? <FileTextIcon size={20} className="text-red-500" /> : <FileTextIcon size={20} className="text-cloud-blue" />}
+                        {file.type === 'folder' ? (
+                          <FolderIcon size={20} className="text-cloud-green" />
+                        ) : file.type === 'image' ? (
+                          <ImageIcon size={20} className="text-cloud-pink" />
+                        ) : file.type === 'pdf' ? (
+                          <FileTextIcon size={20} className="text-red-500" />
+                        ) : (
+                          <FileTextIcon size={20} className="text-cloud-blue" />
+                        )}
                       </div>
                       <div className="flex-1">
-                        {renamingFile === file.name ? <Input value={newName} onChange={e => setNewName(e.target.value)} onBlur={() => handleRenameSubmit(file.name)} onKeyDown={e => {
-                    if (e.key === 'Enter') handleRenameSubmit(file.name);
-                    if (e.key === 'Escape') setRenamingFile(null);
-                  }} autoFocus onClick={e => e.stopPropagation()} /> : <>
+                        {renamingFile === file.name ? (
+                          <Input
+                            value={newName}
+                            onChange={e => setNewName(e.target.value)}
+                            onBlur={() => handleRenameSubmit(file.name)}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') handleRenameSubmit(file.name);
+                              if (e.key === 'Escape') setRenamingFile(null);
+                            }}
+                            autoFocus
+                            onClick={e => e.stopPropagation()}
+                          />
+                        ) : (
+                          <>
                             <p className="font-medium text-cloud-gray-deeper dark:text-dark-text">
                               {file.name}
                             </p>
                             <p className="text-sm text-cloud-gray-dark dark:text-dark-text-muted">
-                              {file.type === 'folder' ? `${file.items} items` : file.size}{' '}
+                              {file.type === 'folder' ? `${file.items} items` : file.size}
+                              {' '}
                               • {file.modified}
                             </p>
-                          </>}
+                          </>
+                        )}
                       </div>
-                      {file.synced && <div className="px-3 py-1 bg-cloud-green/20 text-cloud-green text-xs font-medium rounded-full flex items-center gap-1">
+                      {file.synced && (
+                        <div className="px-3 py-1 bg-cloud-green/20 text-cloud-green text-xs font-medium rounded-full flex items-center gap-1">
                           <CloudIcon size={12} />
                           Synced
-                        </div>}
-                    </div>)}
-                </div>}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
       </Window>
 
       {/* Context Menu */}
-      {contextMenu && <div className="fixed bg-white/90 dark:bg-dark-bg-light/90 backdrop-blur-cloud rounded-cloud-lg shadow-cloud-lg border border-cloud-gray/20 dark:border-dark-border py-2 min-w-[200px] z-50" style={{
-      left: contextMenu.x,
-      top: contextMenu.y
-    }} onClick={e => e.stopPropagation()}>
-          {contextMenu.file ? <>
-              <button onClick={() => handleFileClick(contextMenu.file!)} className="w-full px-4 py-2 text-left hover:bg-cloud-gray/20 dark:hover:bg-dark-bg-lighter transition-colors text-cloud-gray-deeper dark:text-dark-text">
+      {contextMenu && (
+        <div
+          className="fixed bg-white/90 dark:bg-dark-bg-light/90 backdrop-blur-cloud rounded-cloud-lg shadow-cloud-lg border border-cloud-gray/20 dark:border-dark-border py-2 min-w-[200px] z-50"
+          style={{
+            left: contextMenu?.x ?? 0,
+            top: contextMenu?.y ?? 0
+          }}
+          onClick={e => e.stopPropagation()}
+        >
+          {contextMenu.file ? (
+            <>
+              <button
+                onClick={() => handleFileClick(contextMenu.file!)}
+                className="w-full px-4 py-2 text-left hover:bg-cloud-gray/20 dark:hover:bg-dark-bg-lighter transition-colors text-cloud-gray-deeper dark:text-dark-text"
+              >
                 Open
               </button>
-              <button onClick={() => handleRename(contextMenu.file!)} className="w-full px-4 py-2 text-left hover:bg-cloud-gray/20 dark:hover:bg-dark-bg-lighter transition-colors text-cloud-gray-deeper dark:text-dark-text flex items-center gap-2">
+              <button
+                onClick={() => handleRename(contextMenu.file!)}
+                className="w-full px-4 py-2 text-left hover:bg-cloud-gray/20 dark:hover:bg-dark-bg-lighter transition-colors text-cloud-gray-deeper dark:text-dark-text flex items-center gap-2"
+              >
                 <Edit2Icon size={16} />
                 Rename
               </button>
-              <button onClick={() => handleDelete(contextMenu.file!)} className="w-full px-4 py-2 text-left hover:bg-red-500/20 transition-colors text-red-500 flex items-center gap-2">
+              <button
+                onClick={() => handleDelete(contextMenu.file!)}
+                className="w-full px-4 py-2 text-left hover:bg-red-500/20 transition-colors text-red-500 flex items-center gap-2"
+              >
                 <TrashIcon size={16} />
                 Move to Trash
               </button>
-            </> : <>
-              <button onClick={handleCreateFolder} className="w-full px-4 py-2 text-left hover:bg-cloud-gray/20 dark:hover:bg-dark-bg-lighter transition-colors text-cloud-gray-deeper dark:text-dark-text flex items-center gap-2">
+            </>
+          ) : (
+            <>
+              <button
+                onClick={handleCreateFolder}
+                className="w-full px-4 py-2 text-left hover:bg-cloud-gray/20 dark:hover:bg-dark-bg-lighter transition-colors text-cloud-gray-deeper dark:text-dark-text flex items-center gap-2"
+              >
                 <FolderPlusIcon size={16} />
                 New Folder
               </button>
-              <button onClick={handleCreateFile} className="w-full px-4 py-2 text-left hover:bg-cloud-gray/20 dark:hover:bg-dark-bg-lighter transition-colors text-cloud-gray-deeper dark:text-dark-text flex items-center gap-2">
+              <button
+                onClick={handleCreateFile}
+                className="w-full px-4 py-2 text-left hover:bg-cloud-gray/20 dark:hover:bg-dark-bg-lighter transition-colors text-cloud-gray-deeper dark:text-dark-text flex items-center gap-2"
+              >
                 <FilePlusIcon size={16} />
                 New Text File
               </button>
-            </>}
-        </div>}
-    </div>;
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
 }

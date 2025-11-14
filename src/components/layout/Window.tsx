@@ -8,6 +8,7 @@ export interface WindowProps {
   onMaximize?: () => void;
   width?: string;
   height?: string;
+  maximized?: boolean;
 }
 export function Window({
   title,
@@ -16,10 +17,11 @@ export function Window({
   onMinimize,
   onMaximize,
   width = 'w-full',
-  height = 'h-full'
+  height = 'h-full',
+  maximized = false
 }: WindowProps) {
   return <div className={`
-      ${width} ${height}
+      ${maximized ? 'fixed inset-0 z-50 w-screen h-screen' : `${width} ${height}`}
       bg-white/90 dark:bg-dark-bg/90
       backdrop-blur-cloud
       rounded-cloud-xl
@@ -27,6 +29,7 @@ export function Window({
       border border-cloud-gray/20 dark:border-dark-border
       overflow-hidden
       flex flex-col
+      ${maximized ? 'transition-all duration-300' : ''}
     `}>
       {/* Title Bar */}
       <div className="
