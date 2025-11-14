@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Window } from '../components/layout/Window';
 import { Card } from '../components/ui/Card';
 import { Switch } from '../components/ui/Switch';
@@ -7,21 +7,94 @@ import { Button } from '../components/ui/Button';
 import { MonitorIcon, WifiIcon, Volume2Icon, BluetoothIcon, LockIcon, AccessibilityIcon, HardDriveIcon, BatteryIcon, CodeIcon, CloudIcon, InfoIcon } from 'lucide-react';
 export interface SettingsProps {
   onClose: () => void;
+  onMaximize?: () => void;
+  maximized?: boolean;
   onOpenStorageManager?: () => void;
+  onOpenTerminal?: () => void;
+  darkMode: boolean;
+  onDarkModeChange: (value: boolean) => void;
+  accentColor: string;
+  onAccentColorChange: (color: string) => void;
+  selectedWallpaper: number;
+  onWallpaperChange: (id: number) => void;
 }
 export function Settings({
   onClose,
-  onOpenStorageManager
+  onMaximize,
+  maximized = false,
+  onOpenStorageManager,
+  onOpenTerminal,
+  darkMode,
+  onDarkModeChange,
+  accentColor,
+  onAccentColorChange,
+  selectedWallpaper,
+  onWallpaperChange
 }: SettingsProps) {
   const [selectedCategory, setSelectedCategory] = useState('display');
-  const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState(true);
   const [autoUpdate, setAutoUpdate] = useState(true);
   const [brightness, setBrightness] = useState(75);
   const [volume, setVolume] = useState(60);
   const [wifi, setWifi] = useState(true);
   const [bluetooth, setBluetooth] = useState(true);
-  const [selectedWallpaper, setSelectedWallpaper] = useState(0);
+  const [selectedOutputDevice, setSelectedOutputDevice] = useState('Built-in Speakers');
+
+  const [wifiNetworks, setWifiNetworks] = useState([
+    { name: 'Home Network',  signal: 'Excellent', secured: true, connected: true },
+    { name: 'Office WiFi',   signal: 'Good',      secured: true, connected: false },
+    { name: 'Guest Network', signal: 'Fair',      secured: false, connected: false },
+    { name: 'Neighbor WiFi', signal: 'Weak',      secured: true, connected: false }
+  ]);
+
+  const [pairedDevices, setPairedDevices] = useState([
+    { name: 'PlayStation 5 Controller', type: 'Game Controller', battery: 85, connected: true },
+    { name: 'AirPods Pro',              type: 'Audio',           battery: 72, connected: true }
+  ]);
+
+  const [availableDevices, setAvailableDevices] = useState([
+    { name: 'Magic Mouse', type: 'Mouse' },
+    { name: 'Beats Studio', type: 'Headphones' }
+  ]);
+
+  const [locationServices, setLocationServices] = useState(true);
+  const [analytics, setAnalytics] = useState(false);
+
+  const connectedWifi = wifiNetworks.find(n => n.connected);
+
+  const handleConnectNetwork = (name: string) => {
+    setWifiNetworks(prev =>
+      prev.map(n =>
+        n.name === name
+          ? { ...n, connected: true }
+          : { ...n, connected: false }
+      )
+    );
+    setWifi(true);
+  };
+
+  const handlePairDevice = (device: { name: string; type: string }) => {
+    setAvailableDevices(prev => prev.filter(d => d.name !== device.name));
+    setPairedDevices(prev => [
+      ...prev,
+      { ...device, battery: 100, connected: true }
+    ]);
+  };
+
+  const handleDisconnectDevice = (device: { name: string; type: string; battery: number }) => {
+    setPairedDevices(prev => prev.filter(d => d.name !== device.name));
+    setAvailableDevices(prev => [
+      ...prev,
+      { name: device.name, type: device.type }
+    ]);
+  };
+
+  const [textSize, setTextSize] = useState("Medium");
+  const [highContrast, setHighContrast] = useState(false);
+  const [screenReader, setScreenReader] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
+
+
   const categories = [{
     id: 'display',
     label: 'Display',
@@ -89,7 +162,7 @@ export function Settings({
     gradient: 'from-purple-300 via-purple-400 to-purple-500'
   }];
   return <div className="fixed inset-0 z-40 flex items-center justify-center p-6 bg-black/20 backdrop-blur-sm animate-fade-in">
-      <Window title="Settings" onClose={onClose} width="w-full max-w-6xl" height="h-[85vh]">
+      <Window title="Settings" onClose={onClose} onMaximize={onMaximize} maximized={maximized} width="w-full max-w-6xl" height="h-[85vh]">
         <div className="flex h-full">
           {/* Sidebar */}
           <div className="w-64 border-r border-cloud-gray/20 dark:border-dark-border p-4 space-y-2 overflow-auto">
@@ -122,7 +195,10 @@ export function Settings({
                           Use dark theme across the system
                         </p>
                       </div>
-                      <Switch checked={darkMode} onChange={setDarkMode} />
+                      <Switch 
+                        checked={darkMode} 
+                        onChange={onDarkModeChange} 
+                      />
                     </div>
 
                     <div>
@@ -130,9 +206,20 @@ export function Settings({
                         Accent Color
                       </p>
                       <div className="flex gap-3">
-                        {['#A8D5BA', '#A8C5E0', '#C5B8E0', '#E0B8D5', '#FBD38D'].map(color => <button key={color} className="w-12 h-12 rounded-cloud-lg border-2 border-transparent hover:border-white transition-all shadow-cloud" style={{
-                      backgroundColor: color
-                    }} />)}
+                        {['#A8D5BA', '#A8C5E0', '#C5B8E0', '#E0B8D5', '#FBD38D'].map(color => {
+                          const isActive = color === accentColor;
+                          return (
+                            <button
+                              key={color}
+                              onClick={() => onAccentColorChange(color)}
+                              className={`
+                                w-12 h-12 rounded-cloud-lg border-2 transition-all shadow-cloud
+                                ${isActive ? 'border-white ring-2 ring-cloud-green' : 'border-transparent hover:border-white'}
+                              `}
+                              style={{ backgroundColor: color }}
+                            />
+                          );
+                        })}
                       </div>
                     </div>
 
@@ -141,10 +228,16 @@ export function Settings({
                         Wallpaper
                       </p>
                       <div className="grid grid-cols-5 gap-3">
-                        {wallpapers.map(wallpaper => <button key={wallpaper.id} onClick={() => setSelectedWallpaper(wallpaper.id)} className={`
+                        {wallpapers.map(wallpaper => (
+                          <button
+                            key={wallpaper.id}
+                            onClick={() => onWallpaperChange(wallpaper.id)}
+                            className={`
                               aspect-video rounded-cloud-lg bg-gradient-to-br ${wallpaper.gradient} transition-all
                               ${selectedWallpaper === wallpaper.id ? 'ring-4 ring-cloud-green ring-offset-2' : 'hover:scale-105'}
-                            `} />)}
+                            `}
+                          />
+                        ))}
                       </div>
                     </div>
 
@@ -193,23 +286,27 @@ export function Settings({
                       Output Device
                     </label>
                     <div className="space-y-2">
-                      {[{
-                    name: 'Built-in Speakers',
-                    selected: true
-                  }, {
-                    name: 'AirPods Pro',
-                    selected: false
-                  }, {
-                    name: 'HDMI Audio',
-                    selected: false
-                  }].map((device, i) => <button key={i} className={`
-                            w-full p-4 rounded-cloud-lg text-left transition-all
-                            ${device.selected ? 'bg-cloud-green/10 border-2 border-cloud-green' : 'bg-cloud-gray/10 dark:bg-dark-bg-lighter/50 border-2 border-transparent hover:bg-cloud-gray/20'}
-                          `}>
-                          <p className="font-medium text-cloud-gray-deeper dark:text-dark-text">
-                            {device.name}
-                          </p>
-                        </button>)}
+                      {['Built-in Speakers', 'AirPods Pro', 'HDMI Audio'].map(deviceName => {
+                        const selected = deviceName === selectedOutputDevice;
+                        return (
+                          <button
+                            key={deviceName}
+                            onClick={() => setSelectedOutputDevice(deviceName)}
+                            className={`
+                              w-full p-4 rounded-cloud-lg text-left transition-all
+                              ${
+                                selected
+                                  ? 'bg-cloud-green/10 border-2 border-cloud-green'
+                                  : 'bg-cloud-gray/10 dark:bg-dark-bg-lighter/50 border-2 border-transparent hover:bg-cloud-gray/20'
+                              }
+                            `}
+                          >
+                            <p className="font-medium text-cloud-gray-deeper dark:text-dark-text">
+                              {deviceName}
+                            </p>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
@@ -226,7 +323,11 @@ export function Settings({
                         Wi-Fi
                       </p>
                       <p className="text-sm text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
-                        {wifi ? 'Connected to "Home Network"' : 'Disabled'}
+                        {wifi
+                          ? connectedWifi
+                            ? `Connected to "${connectedWifi.name}"`
+                            : 'Not connected'
+                          : 'Disabled'}
                       </p>
                     </div>
                     <Switch checked={wifi} onChange={setWifi} />
@@ -236,30 +337,19 @@ export function Settings({
                       <p className="text-sm font-semibold text-cloud-gray-deeper dark:text-dark-text mb-3">
                         Available Networks
                       </p>
-                      {[{
-                  name: 'Home Network',
-                  signal: 'Excellent',
-                  secured: true,
-                  connected: true
-                }, {
-                  name: 'Office WiFi',
-                  signal: 'Good',
-                  secured: true,
-                  connected: false
-                }, {
-                  name: 'Guest Network',
-                  signal: 'Fair',
-                  secured: false,
-                  connected: false
-                }, {
-                  name: 'Neighbor WiFi',
-                  signal: 'Weak',
-                  secured: true,
-                  connected: false
-                }].map((network, i) => <div key={i} className={`
+                      {wifiNetworks.map(network => (
+                        <div
+                          key={network.name}
+                          onClick={() => !network.connected && handleConnectNetwork(network.name)}
+                          className={`
                             p-4 rounded-cloud-lg transition-colors cursor-pointer
-                            ${network.connected ? 'bg-cloud-green/10 border-2 border-cloud-green' : 'bg-cloud-gray/10 dark:bg-dark-bg-lighter/50 border-2 border-transparent hover:bg-cloud-gray/20'}
-                          `}>
+                            ${
+                              network.connected
+                                ? 'bg-cloud-green/10 border-2 border-cloud-green'
+                                : 'bg-cloud-gray/10 dark:bg-dark-bg-lighter/50 border-2 border-transparent hover:bg-cloud-gray/20'
+                            }
+                          `}
+                        >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               <div className="text-2xl">
@@ -274,14 +364,27 @@ export function Settings({
                                 </p>
                               </div>
                             </div>
-                            {network.connected ? <span className="text-sm font-medium text-cloud-green">
+                            {network.connected ? (
+                              <span className="text-sm font-medium text-cloud-green">
                                 Connected
-                              </span> : <Button variant="secondary" size="sm">
+                              </span>
+                            ) : (
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  handleConnectNetwork(network.name);
+                                }}
+                              >
                                 Connect
-                              </Button>}
+                              </Button>
+                            )}
                           </div>
-                        </div>)}
-                    </div>}
+                        </div>
+                      ))}
+                  </div>
+}
                 </div>
               </Card>}
 
@@ -292,7 +395,9 @@ export function Settings({
                       Bluetooth
                     </h3>
                     <p className="text-sm text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
-                      {bluetooth ? '2 devices connected' : 'Disabled'}
+                      {bluetooth
+                        ? `${pairedDevices.length} device${pairedDevices.length === 1 ? '' : 's'} connected`
+                        : 'Disabled'}
                     </p>
                   </div>
                   <Switch checked={bluetooth} onChange={setBluetooth} />
@@ -303,18 +408,12 @@ export function Settings({
                       <p className="text-sm font-semibold text-cloud-gray-deeper dark:text-dark-text mb-3">
                         Paired Devices
                       </p>
-                      <div className="space-y-3">
-                        {[{
-                    name: 'PlayStation 5 Controller',
-                    type: 'Game Controller',
-                    battery: 85,
-                    connected: true
-                  }, {
-                    name: 'AirPods Pro',
-                    type: 'Audio',
-                    battery: 72,
-                    connected: true
-                  }].map((device, i) => <div key={i} className="p-4 bg-cloud-green/10 border-2 border-cloud-green rounded-cloud-lg">
+                                            <div className="space-y-3">
+                        {pairedDevices.map(device => (
+                          <div
+                            key={device.name}
+                            className="p-4 bg-cloud-green/10 border-2 border-cloud-green rounded-cloud-lg"
+                          >
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-3">
                                 <div className="text-2xl">🔵</div>
@@ -327,11 +426,16 @@ export function Settings({
                                   </p>
                                 </div>
                               </div>
-                              <Button variant="ghost" size="sm">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDisconnectDevice(device)}
+                              >
                                 Disconnect
                               </Button>
                             </div>
-                          </div>)}
+                          </div>
+                        ))}
                       </div>
                     </div>
 
@@ -339,14 +443,13 @@ export function Settings({
                       <p className="text-sm font-semibold text-cloud-gray-deeper dark:text-dark-text mb-3">
                         Available Devices
                       </p>
-                      <div className="space-y-3">
-                        {[{
-                    name: 'Magic Mouse',
-                    type: 'Mouse'
-                  }, {
-                    name: 'Beats Studio',
-                    type: 'Headphones'
-                  }].map((device, i) => <div key={i} className="p-4 bg-cloud-gray/10 dark:bg-dark-bg-lighter/50 rounded-cloud-lg hover:bg-cloud-gray/20 transition-colors cursor-pointer">
+                                            <div className="space-y-3">
+                        {availableDevices.map(device => (
+                          <div
+                            key={device.name}
+                            className="p-4 bg-cloud-gray/10 dark:bg-dark-bg-lighter/50 rounded-cloud-lg hover:bg-cloud-gray/20 transition-colors cursor-pointer"
+                            onClick={() => handlePairDevice(device)}
+                          >
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-3">
                                 <div className="text-2xl">⚪</div>
@@ -359,11 +462,19 @@ export function Settings({
                                   </p>
                                 </div>
                               </div>
-                              <Button variant="secondary" size="sm">
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  handlePairDevice(device);
+                                }}
+                              >
                                 Pair
                               </Button>
                             </div>
-                          </div>)}
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </>}
@@ -501,7 +612,12 @@ export function Settings({
                     <Switch checked={false} onChange={() => {}} />
                   </div>
 
-                  <Button variant="secondary" className="w-full">
+                  <Button variant="secondary" className="w-full" onClick={() => {
+                    if (onOpenTerminal) {
+                      onClose();
+                      onOpenTerminal();
+                    }
+                  }}>
                     Open Terminal
                   </Button>
                 </div>
@@ -641,7 +757,7 @@ export function Settings({
                         Allow apps to access your location
                       </p>
                     </div>
-                    <Switch checked={true} onChange={() => {}} />
+                    <Switch checked={locationServices} onChange={setLocationServices} />
                   </div>
 
                   <div className="flex items-center justify-between">
@@ -653,7 +769,7 @@ export function Settings({
                         Share usage data to improve CloudOS
                       </p>
                     </div>
-                    <Switch checked={false} onChange={() => {}} />
+                    <Switch checked={analytics} onChange={setAnalytics} />
                   </div>
                 </div>
               </Card>}
@@ -672,7 +788,7 @@ export function Settings({
                         Make text and UI elements more visible
                       </p>
                     </div>
-                    <Switch checked={false} onChange={() => {}} />
+                    <Switch checked={highContrast} onChange={setHighContrast} />
                   </div>
 
                   <div className="flex items-center justify-between">
@@ -684,7 +800,7 @@ export function Settings({
                         Minimize animations and transitions
                       </p>
                     </div>
-                    <Switch checked={false} onChange={() => {}} />
+                    <Switch checked={screenReader} onChange={setScreenReader} />
                   </div>
 
                   <div className="flex items-center justify-between">
@@ -696,12 +812,35 @@ export function Settings({
                         Enable voice feedback for UI elements
                       </p>
                     </div>
-                    <Switch checked={false} onChange={() => {}} />
+                    <Switch checked={reduceMotion} onChange={setReduceMotion} />
                   </div>
 
                   <div>
-                    <Slider label="Text Size" value={100} onChange={() => {}} min={75} max={150} />
+                    <label className="block text-sm font-medium text-cloud-gray-dark dark:text-dark-text-muted mb-3">
+                      Text Size
+                    </label>
+
+                    <div className="space-y-2">
+                      {["Small", "Medium", "Large", "Extra Large"].map(size => {
+                        const active = textSize === size;
+                        return (
+                          <button
+                            key={size}
+                            onClick={() => setTextSize(size)}
+                            className={`
+                              w-full p-4 rounded-cloud-lg text-left transition-all
+                              ${active
+                                ? "bg-cloud-green/10 border-2 border-cloud-green"
+                                : "bg-cloud-gray/10 dark:bg-dark-bg-lighter/50 border-2 border-transparent hover:bg-cloud-gray/20"}
+                            `}
+                          >
+                            <p className="font-medium text-cloud-gray-deeper dark:text-dark-text">{size}</p>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
+
                 </div>
               </Card>}
           </div>

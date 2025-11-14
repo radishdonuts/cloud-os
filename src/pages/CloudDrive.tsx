@@ -4,7 +4,6 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
 import {
-  CloudIcon,
   UploadCloudIcon,
   DownloadCloudIcon,
   SmartphoneIcon,
@@ -148,13 +147,13 @@ export function CloudDrive({ onClose }: CloudDriveProps) {
   const storageTotal = '15 GB';
 
   return (
-    <Window
-      title="CloudOS Drive"
-      onClose={onClose}
-      icon={<CloudIcon size={20} />}
-      defaultWidth={900}
-      defaultHeight={600}
-    >
+    <div className="fixed inset-0 z-40 flex items-center justify-center p-6 bg-black/20 backdrop-blur-sm animate-fade-in">
+      <Window
+        title="CloudOS Drive"
+        onClose={onClose}
+        width="w-full max-w-5xl"
+        height="h-[85vh]"
+      >
       <div className="flex flex-col h-full bg-cloud-cream dark:bg-dark-bg">
         {/* Header Stats */}
         <div className="p-6 border-b border-cloud-gray/20 dark:border-dark-border">
@@ -399,7 +398,8 @@ export function CloudDrive({ onClose }: CloudDriveProps) {
           )}
         </div>
       </div>
-    </Window>
+      </Window>
+    </div>
   );
 }
 

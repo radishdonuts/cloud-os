@@ -1,8 +1,9 @@
+import { FolderIcon } from 'lucide-react';
 import React from 'react';
-import { FolderIcon, BoxIcon } from 'lucide-react';
+
 export interface AppIconProps {
   name: string;
-  icon?: BoxIcon;
+  icon?: React.ComponentType<{ size?: string | number; className?: string }>;
   emoji?: string;
   image?: string; // PNG image path
   onClick?: () => void;

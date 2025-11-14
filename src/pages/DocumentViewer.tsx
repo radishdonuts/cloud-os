@@ -4,14 +4,20 @@ import { FileTextIcon } from 'lucide-react';
 export interface DocumentViewerProps {
   onClose: () => void;
   fileName: string;
+  onMinimize?: () => void;
+  onMaximize?: () => void;
+  maximized?: boolean;
 }
 export function DocumentViewer({
   onClose,
-  fileName
+  fileName,
+  onMinimize,
+  onMaximize,
+  maximized = false
 }: DocumentViewerProps) {
   const [content, setContent] = useState(`Sample Document: ${fileName}\n\nThis is a simulated document viewer and editor.\n\nYou can edit this text, but changes won't be saved when you close the window.\n\nIn a real application, this would be a full-featured text editor with formatting options, spell check, and the ability to save changes.`);
   return <div className="fixed inset-0 z-40 flex items-center justify-center p-6 bg-black/20 backdrop-blur-sm animate-fade-in">
-      <Window title={fileName} onClose={onClose} width="w-full max-w-5xl" height="h-[85vh]">
+      <Window title={fileName} onClose={onClose} onMinimize={onMinimize} onMaximize={onMaximize} maximized={maximized} width="w-full max-w-5xl" height="h-[85vh]">
         <div className="h-full flex flex-col">
           {/* Toolbar */}
           <div className="px-6 py-3 border-b border-cloud-gray/20 dark:border-dark-border flex items-center gap-4">

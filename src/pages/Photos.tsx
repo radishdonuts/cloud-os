@@ -6,6 +6,9 @@ import { ChevronLeftIcon, ChevronRightIcon, XIcon, TrashIcon } from 'lucide-reac
 export interface PhotosProps {
   onClose: () => void;
   initialFolder?: string;
+  onMinimize?: () => void;
+  onMaximize?: () => void;
+  maximized?: boolean;
 }
 interface Photo {
   id: string;
@@ -15,7 +18,10 @@ interface Photo {
 }
 export function Photos({
   onClose,
-  initialFolder = 'All Photos'
+  initialFolder = 'All Photos',
+  onMinimize,
+  onMaximize,
+  maximized = false
 }: PhotosProps) {
   const [selectedFolder, setSelectedFolder] = useState(initialFolder);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
@@ -82,7 +88,7 @@ export function Photos({
     setSelectedPhoto(null);
   };
   return <div className="fixed inset-0 z-40 flex items-center justify-center p-6 bg-black/20 backdrop-blur-sm animate-fade-in">
-      <Window title="Photos" onClose={onClose} width="w-full max-w-6xl" height="h-[85vh]">
+      <Window title="Photos" onClose={onClose} onMinimize={onMinimize} onMaximize={onMaximize} maximized={maximized} width="w-full max-w-6xl" height="h-[85vh]">
         <div className="flex h-full">
           {/* Sidebar */}
           <div className="w-64 border-r border-cloud-gray/20 dark:border-dark-border p-4 space-y-2">

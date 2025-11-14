@@ -6,15 +6,21 @@ import { Button } from '../components/ui/Button';
 import { GamepadIcon, MonitorIcon, MicIcon, VideoIcon, CameraIcon, TrendingUpIcon } from 'lucide-react';
 export interface GameModeProps {
   onClose: () => void;
+  onMinimize?: () => void;
+  onMaximize?: () => void;
+  maximized?: boolean;
 }
 export function GameMode({
-  onClose
+  onClose,
+  onMinimize,
+  onMaximize,
+  maximized = false
 }: GameModeProps) {
   const [gameMode, setGameMode] = useState(true);
   const [recording, setRecording] = useState(false);
   const [showFPS, setShowFPS] = useState(true);
   return <div className="fixed inset-0 z-40 flex items-center justify-center p-6 bg-black/20 backdrop-blur-sm animate-fade-in">
-      <Window title="Gaming & Media" onClose={onClose} onMinimize={() => {}} onMaximize={() => {}} width="w-full max-w-4xl" height="h-[80vh]">
+      <Window title="Game Mode" onClose={onClose} onMinimize={onMinimize} onMaximize={onMaximize} maximized={maximized} width="w-full max-w-4xl" height="h-[80vh]">
         <div className="p-6 space-y-6">
           {/* Game Mode Toggle */}
           <Card className="p-6">

@@ -7,16 +7,20 @@ import { WifiIcon, BluetoothIcon, AirplayIcon, MoonIcon, SunIcon, Volume2Icon, B
 export interface QuickSettingsProps {
   onClose: () => void;
   onOpenSettings?: () => void;
+  darkMode: boolean;
+  onDarkModeChange: (value: boolean) => void;
 }
 export function QuickSettings({
   onClose,
-  onOpenSettings
+  onOpenSettings,
+  darkMode,
+  onDarkModeChange
 }: QuickSettingsProps) {
   const [wifi, setWifi] = useState(true);
   const [bluetooth, setBluetooth] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
   const [volume, setVolume] = useState(60);
   const [brightness, setBrightness] = useState(80);
+  const [airplayOn, setAirplayOn] = useState(false);
   const handleOpenSettings = () => {
     onClose();
     if (onOpenSettings) {
@@ -63,17 +67,29 @@ export function QuickSettings({
             </p>
           </button>
 
-          <button className="p-4 rounded-cloud-lg bg-cloud-gray/20 border-2 border-transparent hover:bg-cloud-gray/30 transition-all duration-200">
-            <AirplayIcon size={24} className="text-cloud-gray-dark" />
+          <button
+            onClick={() => setAirplayOn(!airplayOn)}
+            className={`
+              p-4 rounded-cloud-lg transition-all duration-200
+              ${airplayOn
+                ? 'bg-cloud-purple/20 border-2 border-cloud-purple'
+                : 'bg-cloud-gray/20 border-2 border-transparent hover:bg-cloud-gray/30'}
+            `}
+          >
+            <AirplayIcon
+              size={24}
+              className={airplayOn ? 'text-cloud-purple' : 'text-cloud-gray-dark'}
+            />
             <p className="text-sm font-medium text-cloud-gray-deeper dark:text-dark-text mt-2">
               AirPlay
             </p>
             <p className="text-xs text-cloud-gray-dark dark:text-dark-text-muted">
-              Off
+              {airplayOn ? 'Casting Enabled' : 'Off'}
             </p>
           </button>
 
-          <button onClick={() => setDarkMode(!darkMode)} className={`
+
+          <button onClick={() => onDarkModeChange(!darkMode)} className={`
               p-4 rounded-cloud-lg transition-all duration-200
               ${darkMode ? 'bg-cloud-purple/20 border-2 border-cloud-purple' : 'bg-cloud-gray/20 border-2 border-transparent'}
             `}>
