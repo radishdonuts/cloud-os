@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { CloudIcon } from '../components/ui/CloudIcon';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { FolderIcon, ImageIcon, SettingsIcon, MonitorIcon, CpuIcon, HardDriveIcon, ShoppingBagIcon, GamepadIcon, PowerIcon, MoonIcon, LogOutIcon, FileTextIcon, SearchIcon } from 'lucide-react';
+import { FolderIcon, ImageIcon, SettingsIcon, MonitorIcon, CpuIcon, HardDriveIcon, ShoppingBagIcon, GamepadIcon, PowerIcon, MoonIcon, LogOutIcon, FileTextIcon, SearchIcon, UsersIcon } from 'lucide-react';
 export interface LauncherProps {
   onClose: () => void;
   onAppOpen: (app: string) => void;
   onLogout: () => void;
+  onSwitchUser: () => void;
   onSleep: () => void;
   onShutdown: () => void;
 }
@@ -14,6 +15,7 @@ export function Launcher({
   onClose,
   onAppOpen,
   onLogout,
+  onSwitchUser,
   onSleep,
   onShutdown
 }: LauncherProps) {
@@ -92,6 +94,12 @@ export function Launcher({
             onClose();
           }} className="p-3 rounded-cloud-lg bg-cloud-gray/20 hover:bg-cloud-gray/30 transition-colors" title="Sleep">
               <MoonIcon size={20} className="text-cloud-gray-deeper dark:text-dark-text" />
+            </button>
+            <button onClick={() => {
+            onSwitchUser();
+            onClose();
+          }} className="p-3 rounded-cloud-lg bg-cloud-purple/20 hover:bg-cloud-purple/30 transition-colors" title="Switch User">
+              <UsersIcon size={20} className="text-cloud-purple" />
             </button>
             <button onClick={() => {
             onLogout();

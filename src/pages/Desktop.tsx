@@ -3,37 +3,64 @@ import { Dock } from '../components/desktop/Dock';
 import { SystemTray } from '../components/desktop/SystemTray';
 import { AppIcon } from '../components/desktop/AppIcon';
 import { CloudIcon } from '../components/ui/CloudIcon';
-import { FolderIcon, FileTextIcon, ImageIcon } from 'lucide-react';
+import { FolderIcon, FileTextIcon, ImageIcon, GamepadIcon } from 'lucide-react';
+import { User } from '../App';
+
 export interface DesktopProps {
+  currentUser: User;
   onAppOpen: (app: string) => void;
   onQuickSettingsOpen: () => void;
   onNotificationsOpen: () => void;
   trashCount?: number;
 }
 export function Desktop({
+  currentUser,
   onAppOpen,
   onQuickSettingsOpen,
   onNotificationsOpen,
   trashCount = 0
 }: DesktopProps) {
-  const desktopApps = [{
-    name: 'Documents',
-    icon: FolderIcon,
-    action: () => onAppOpen('files-documents')
-  }, {
-    name: 'Projects',
-    icon: FolderIcon,
-    action: () => onAppOpen('files-desktop')
-  }, {
-    name: 'Photos',
-    icon: ImageIcon,
-    action: () => onAppOpen('photos')
-  }, {
-    name: 'Notes',
-    emoji: '📝',
-    action: () => onAppOpen('notes')
-  }];
-  return <div className="w-full min-h-screen bg-gradient-to-br from-cloud-green via-cloud-blue/30 to-cloud-purple/20 relative overflow-hidden">
+  // Generate desktop apps based on user data
+  const desktopApps = currentUser.desktopApps.map(app => {
+    let icon = FolderIcon;
+    let action = () => onAppOpen('files-documents');
+    let emoji: string | undefined;
+    let image: string | undefined = app.image;
+
+    if (app.icon === 'folder') {
+      icon = FolderIcon;
+      if (app.name.toLowerCase().includes('document')) {
+        action = () => onAppOpen('files-documents');
+      } else if (app.name.toLowerCase().includes('project') || app.name.toLowerCase().includes('desktop')) {
+        action = () => onAppOpen('files-desktop');
+      } else {
+        action = () => onAppOpen('files');
+      }
+    } else if (app.icon === 'image') {
+      icon = ImageIcon;
+      action = () => onAppOpen('photos');
+    } else if (app.icon === 'note') {
+      icon = FileTextIcon;
+      action = () => onAppOpen('notes');
+    } else if (app.icon === 'game') {
+      icon = GamepadIcon;
+      action = () => onAppOpen('game-mode');
+    }
+
+    if (app.name.toLowerCase().includes('note')) {
+      emoji = '📝';
+      icon = undefined as any;
+    }
+
+    return {
+      name: app.name,
+      icon: emoji || image ? undefined : icon,
+      emoji: emoji,
+      image: image,
+      action
+    };
+  });
+  return <div className={`w-full min-h-screen bg-gradient-to-br ${currentUser.wallpaper.gradient} relative overflow-hidden transition-all duration-500`}>
       {/* Animated Background Clouds */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {[...Array(12)].map((_, i) => <div key={i} className="absolute opacity-10" style={{
@@ -48,7 +75,7 @@ export function Desktop({
 
       {/* Desktop Icons */}
       <div className="relative z-10 p-8 grid grid-cols-8 gap-4 content-start">
-        {desktopApps.map((app, i) => <AppIcon key={i} name={app.name} icon={app.icon} emoji={app.emoji} onClick={app.action} />)}
+        {desktopApps.map((app, i) => <AppIcon key={i} name={app.name} icon={app.icon} emoji={app.emoji} image={app.image} onClick={app.action} />)}
       </div>
 
       {/* System Tray */}

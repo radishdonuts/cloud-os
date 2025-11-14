@@ -1,374 +1,283 @@
-import React, { useState } from 'react';
-import { Card } from '../components/ui/Card';
-import { Button } from '../components/ui/Button';
-import { Switch } from '../components/ui/Switch';
-import { CloudIcon } from '../components/ui/CloudIcon';
-import { CpuIcon, HardDriveIcon, MemoryStickIcon, MonitorIcon, ShieldIcon, ActivityIcon } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+
 export function BIOSScreen({
   onContinue
 }: {
   onContinue: () => void;
 }) {
-  const [activeTab, setActiveTab] = useState('system');
-  const [virtualization, setVirtualization] = useState(true);
-  const [secureBoot, setSecureBoot] = useState(true);
-  const [fastBoot, setFastBoot] = useState(false);
-  const tabs = [{
-    id: 'system',
-    label: 'System Info',
-    icon: MonitorIcon
-  }, {
-    id: 'boot',
-    label: 'Boot Order',
-    icon: HardDriveIcon
-  }, {
-    id: 'virtualization',
-    label: 'Virtualization',
-    icon: CpuIcon
-  }, {
-    id: 'security',
-    label: 'Security',
-    icon: ShieldIcon
-  }, {
-    id: 'diagnostics',
-    label: 'Diagnostics',
-    icon: ActivityIcon
-  }];
-  return <div className="w-full min-h-screen bg-gradient-to-br from-cloud-cream via-cloud-gray to-cloud-green/20 p-8 flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
-          <CloudIcon size={48} animated />
-          <div>
-            <h1 className="text-3xl font-bold text-cloud-gray-deeper">
-              CloudOS Firmware
-            </h1>
-            <p className="text-cloud-gray-dark">Version 2.0.1</p>
+  const [activeTab, setActiveTab] = useState(0); // 0=Main, 1=Advanced, 2=Boot, 3=Security, 4=Exit
+  const [selectedOption, setSelectedOption] = useState(0);
+
+  const tabs = ['Main', 'Advanced', 'Boot', 'Security', 'Exit'];
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        setActiveTab(prev => Math.max(0, prev - 1));
+        setSelectedOption(0);
+      } else if (e.key === 'ArrowRight') {
+        setActiveTab(prev => Math.min(tabs.length - 1, prev + 1));
+        setSelectedOption(0);
+      } else if (e.key === 'ArrowUp') {
+        setSelectedOption(prev => Math.max(0, prev - 1));
+      } else if (e.key === 'ArrowDown') {
+        const maxOptions = activeTab === 0 ? 6 : activeTab === 1 ? 2 : activeTab === 2 ? 3 : activeTab === 3 ? 2 : 1;
+        setSelectedOption(prev => Math.min(maxOptions, prev + 1));
+      } else if (e.key === 'F10') {
+        e.preventDefault();
+        onContinue();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeTab, onContinue, tabs.length]);
+
+  return (
+    <div className="w-full min-h-screen bg-[#000080] text-[#FFFFFF] font-mono flex flex-col p-0">
+      {/* Header Bar */}
+      <div className="bg-[#0000AA] text-white px-4 py-2 flex justify-between items-center border-b-2 border-[#5555FF]">
+        <div className="text-lg font-bold">CloudOS BIOS Setup Utility</div>
+        <div className="text-sm">Version 2.0.1</div>
+      </div>
+
+      {/* Tab Navigation */}
+      <div className="bg-[#00AAAA] border-b-2 border-[#55FFFF] flex">
+        {tabs.map((tab, index) => (
+          <div
+            key={index}
+            className={`px-6 py-2 cursor-pointer ${
+              activeTab === index ? 'bg-[#AAAAAA] text-black font-bold' : 'text-white'
+            }`}
+          >
+            {tab}
+          </div>
+        ))}
+      </div>
+
+      {/* Main Content Area */}
+      <div className="flex-1 p-6 flex gap-6">
+        {/* Left Panel - Main Info */}
+        <div className="flex-1 space-y-4">
+          {activeTab === 0 && (
+            <div className="space-y-3">
+              <div className="text-[#00FFFF] font-bold mb-4">Main</div>
+              <div className="space-y-2 text-sm">
+                <div className="border-2 border-[#5555FF] p-3 bg-[#000055]">
+                  <div className="text-[#FFFF00]">System Information</div>
+                </div>
+                <div className={`p-2 ${selectedOption === 0 ? 'bg-[#AAAAAA] text-black' : ''}`}>
+                  <div className="flex justify-between">
+                    <span>Processor Type:</span>
+                    <span className="text-[#00FF00]">Intel(R) Core i7-12700K</span>
+                  </div>
+                </div>
+                <div className={`p-2 ${selectedOption === 1 ? 'bg-[#AAAAAA] text-black' : ''}`}>
+                  <div className="flex justify-between">
+                    <span>Processor Speed:</span>
+                    <span className="text-[#00FF00]">3.6 GHz</span>
+                  </div>
+                </div>
+                <div className={`p-2 ${selectedOption === 2 ? 'bg-[#AAAAAA] text-black' : ''}`}>
+                  <div className="flex justify-between">
+                    <span>CPU Cores:</span>
+                    <span className="text-[#00FF00]">12 (8P + 4E)</span>
+                  </div>
+                </div>
+                <div className={`p-2 ${selectedOption === 3 ? 'bg-[#AAAAAA] text-black' : ''}`}>
+                  <div className="flex justify-between">
+                    <span>Total Memory:</span>
+                    <span className="text-[#00FF00]">32 GB DDR5</span>
+                  </div>
+                </div>
+                <div className={`p-2 ${selectedOption === 4 ? 'bg-[#AAAAAA] text-black' : ''}`}>
+                  <div className="flex justify-between">
+                    <span>Memory Speed:</span>
+                    <span className="text-[#00FF00]">5600 MHz</span>
+                  </div>
+                </div>
+                <div className={`p-2 ${selectedOption === 5 ? 'bg-[#AAAAAA] text-black' : ''}`}>
+                  <div className="flex justify-between">
+                    <span>BIOS Version:</span>
+                    <span className="text-[#00FF00]">CloudOS 2.0.1</span>
+                  </div>
+                </div>
+                <div className={`p-2 ${selectedOption === 6 ? 'bg-[#AAAAAA] text-black' : ''}`}>
+                  <div className="flex justify-between">
+                    <span>BIOS Date:</span>
+                    <span className="text-[#00FF00]">11/14/2025</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 1 && (
+            <div className="space-y-3">
+              <div className="text-[#00FFFF] font-bold mb-4">Advanced</div>
+              <div className="space-y-2 text-sm">
+                <div className="border-2 border-[#5555FF] p-3 bg-[#000055]">
+                  <div className="text-[#FFFF00]">CPU Configuration</div>
+                </div>
+                <div className={`p-2 ${selectedOption === 0 ? 'bg-[#AAAAAA] text-black' : ''}`}>
+                  <div className="flex justify-between">
+                    <span>Intel Virtualization Technology</span>
+                    <span className="text-[#00FF00]">[Enabled]</span>
+                  </div>
+                </div>
+                <div className={`p-2 ${selectedOption === 1 ? 'bg-[#AAAAAA] text-black' : ''}`}>
+                  <div className="flex justify-between">
+                    <span>Hyper-Threading</span>
+                    <span className="text-[#00FF00]">[Enabled]</span>
+                  </div>
+                </div>
+                <div className="border-2 border-[#5555FF] p-3 bg-[#000055] mt-4">
+                  <div className="text-[#FFFF00]">SATA Configuration</div>
+                </div>
+                <div className={`p-2 ${selectedOption === 2 ? 'bg-[#AAAAAA] text-black' : ''}`}>
+                  <div className="flex justify-between">
+                    <span>SATA Mode</span>
+                    <span className="text-[#00FF00]">[AHCI]</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 2 && (
+            <div className="space-y-3">
+              <div className="text-[#00FFFF] font-bold mb-4">Boot</div>
+              <div className="space-y-2 text-sm">
+                <div className="border-2 border-[#5555FF] p-3 bg-[#000055]">
+                  <div className="text-[#FFFF00]">Boot Priority Order</div>
+                </div>
+                <div className={`p-2 ${selectedOption === 0 ? 'bg-[#AAAAAA] text-black' : ''}`}>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[#00FF00]">1.</span>
+                    <span>CloudOS (NVMe SSD - 1TB)</span>
+                  </div>
+                </div>
+                <div className={`p-2 ${selectedOption === 1 ? 'bg-[#AAAAAA] text-black' : ''}`}>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[#00FF00]">2.</span>
+                    <span>USB Storage Device</span>
+                  </div>
+                </div>
+                <div className={`p-2 ${selectedOption === 2 ? 'bg-[#AAAAAA] text-black' : ''}`}>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[#00FF00]">3.</span>
+                    <span>Network Boot (PXE)</span>
+                  </div>
+                </div>
+                <div className="border-2 border-[#5555FF] p-3 bg-[#000055] mt-4">
+                  <div className="text-[#FFFF00]">Boot Options</div>
+                </div>
+                <div className={`p-2 ${selectedOption === 3 ? 'bg-[#AAAAAA] text-black' : ''}`}>
+                  <div className="flex justify-between">
+                    <span>Fast Boot</span>
+                    <span className="text-[#00FF00]">[Disabled]</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 3 && (
+            <div className="space-y-3">
+              <div className="text-[#00FFFF] font-bold mb-4">Security</div>
+              <div className="space-y-2 text-sm">
+                <div className="border-2 border-[#5555FF] p-3 bg-[#000055]">
+                  <div className="text-[#FFFF00]">Security Settings</div>
+                </div>
+                <div className={`p-2 ${selectedOption === 0 ? 'bg-[#AAAAAA] text-black' : ''}`}>
+                  <div className="flex justify-between">
+                    <span>Secure Boot</span>
+                    <span className="text-[#00FF00]">[Enabled]</span>
+                  </div>
+                </div>
+                <div className={`p-2 ${selectedOption === 1 ? 'bg-[#AAAAAA] text-black' : ''}`}>
+                  <div className="flex justify-between">
+                    <span>TPM Device</span>
+                    <span className="text-[#00FF00]">[Enabled]</span>
+                  </div>
+                </div>
+                <div className={`p-2 ${selectedOption === 2 ? 'bg-[#AAAAAA] text-black' : ''}`}>
+                  <div className="flex justify-between">
+                    <span>Set Administrator Password</span>
+                    <span className="text-[#FF0000]">[Not Set]</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 4 && (
+            <div className="space-y-3">
+              <div className="text-[#00FFFF] font-bold mb-4">Exit</div>
+              <div className="space-y-2 text-sm">
+                <div className={`p-2 ${selectedOption === 0 ? 'bg-[#AAAAAA] text-black' : ''}`}>
+                  Save Changes and Reset
+                </div>
+                <div className={`p-2 ${selectedOption === 1 ? 'bg-[#AAAAAA] text-black' : ''}`}>
+                  Discard Changes and Exit
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Right Panel - Help */}
+        <div className="w-80 border-2 border-[#5555FF] p-4 bg-[#000055] space-y-2 text-sm h-fit">
+          <div className="text-[#FFFF00] font-bold mb-3">Help</div>
+          <div className="space-y-1 text-xs">
+            <div className="flex gap-2">
+              <span className="text-[#00FF00]">↑↓</span>
+              <span>Select Item</span>
+            </div>
+            <div className="flex gap-2">
+              <span className="text-[#00FF00]">←→</span>
+              <span>Select Menu</span>
+            </div>
+            <div className="flex gap-2">
+              <span className="text-[#00FF00]">Enter</span>
+              <span>Select</span>
+            </div>
+            <div className="flex gap-2">
+              <span className="text-[#00FF00]">F10</span>
+              <span>Save and Exit</span>
+            </div>
+            <div className="flex gap-2">
+              <span className="text-[#00FF00]">ESC</span>
+              <span>Exit</span>
+            </div>
+          </div>
+          <div className="border-t-2 border-[#5555FF] mt-4 pt-4">
+            <div className="text-[#FFFF00] mb-2">Item Specific Help</div>
+            <div className="text-xs leading-relaxed">
+              {activeTab === 0 && 'System information and hardware configuration details.'}
+              {activeTab === 1 && 'Configure advanced CPU and system settings.'}
+              {activeTab === 2 && 'Set the boot device priority order.'}
+              {activeTab === 3 && 'Configure security and password settings.'}
+              {activeTab === 4 && 'Save changes or exit without saving.'}
+            </div>
           </div>
         </div>
-        <div className="text-right text-sm text-cloud-gray-dark">
-          <p>Press F2 for Setup</p>
-          <p>Press F12 for Boot Menu</p>
+      </div>
+
+      {/* Footer */}
+      <div className="bg-[#0000AA] text-white px-4 py-2 border-t-2 border-[#5555FF] flex justify-between text-sm">
+        <div className="flex gap-6">
+          <span><span className="text-[#FFFF00]">F1</span> Help</span>
+          <span><span className="text-[#FFFF00]">F9</span> Optimized Defaults</span>
+          <span><span className="text-[#FFFF00]">F10</span> Save & Exit</span>
+        </div>
+        <div>
+          <span><span className="text-[#FFFF00]">ESC</span> Exit</span>
         </div>
       </div>
-
-      {/* Tabs */}
-      <div className="flex gap-2 mb-6">
-        {tabs.map(tab => {
-        const Icon = tab.icon;
-        return <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`
-                flex items-center gap-2 px-6 py-3 rounded-cloud-lg font-medium transition-all duration-200
-                ${activeTab === tab.id ? 'bg-white shadow-cloud text-cloud-green' : 'bg-white/40 text-cloud-gray-dark hover:bg-white/60'}
-              `}>
-              <Icon size={18} />
-              {tab.label}
-            </button>;
-      })}
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 mb-6">
-        {activeTab === 'system' && <div className="grid grid-cols-2 gap-6">
-            <Card className="p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-cloud bg-cloud-green/20 flex items-center justify-center">
-                  <CpuIcon size={24} className="text-cloud-green" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-cloud-gray-deeper">
-                    Processor
-                  </h3>
-                  <p className="text-sm text-cloud-gray-dark">
-                    Intel Core i7-12700K
-                  </p>
-                </div>
-              </div>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-cloud-gray-dark">Cores</span>
-                  <span className="font-medium text-cloud-gray-deeper">
-                    12 (8P + 4E)
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-cloud-gray-dark">Base Clock</span>
-                  <span className="font-medium text-cloud-gray-deeper">
-                    3.6 GHz
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-cloud-gray-dark">Max Turbo</span>
-                  <span className="font-medium text-cloud-gray-deeper">
-                    5.0 GHz
-                  </span>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-cloud bg-cloud-blue/20 flex items-center justify-center">
-                  <MemoryStickIcon size={24} className="text-cloud-blue" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-cloud-gray-deeper">
-                    Memory
-                  </h3>
-                  <p className="text-sm text-cloud-gray-dark">32 GB DDR5</p>
-                </div>
-              </div>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-cloud-gray-dark">Speed</span>
-                  <span className="font-medium text-cloud-gray-deeper">
-                    5600 MHz
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-cloud-gray-dark">Slots Used</span>
-                  <span className="font-medium text-cloud-gray-deeper">
-                    2 of 4
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-cloud-gray-dark">Dual Channel</span>
-                  <span className="font-medium text-cloud-green">Enabled</span>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-cloud bg-cloud-purple/20 flex items-center justify-center">
-                  <MonitorIcon size={24} className="text-cloud-purple" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-cloud-gray-deeper">
-                    Graphics
-                  </h3>
-                  <p className="text-sm text-cloud-gray-dark">
-                    NVIDIA RTX 4070
-                  </p>
-                </div>
-              </div>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-cloud-gray-dark">VRAM</span>
-                  <span className="font-medium text-cloud-gray-deeper">
-                    12 GB GDDR6X
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-cloud-gray-dark">PCIe</span>
-                  <span className="font-medium text-cloud-gray-deeper">
-                    Gen 4 x16
-                  </span>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-cloud bg-cloud-pink/20 flex items-center justify-center">
-                  <HardDriveIcon size={24} className="text-cloud-pink" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-cloud-gray-deeper">
-                    Storage
-                  </h3>
-                  <p className="text-sm text-cloud-gray-dark">1 TB NVMe SSD</p>
-                </div>
-              </div>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-cloud-gray-dark">Interface</span>
-                  <span className="font-medium text-cloud-gray-deeper">
-                    PCIe 4.0 x4
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-cloud-gray-dark">Read Speed</span>
-                  <span className="font-medium text-cloud-gray-deeper">
-                    7000 MB/s
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-cloud-gray-dark">Health</span>
-                  <span className="font-medium text-cloud-green">
-                    Excellent
-                  </span>
-                </div>
-              </div>
-            </Card>
-          </div>}
-
-        {activeTab === 'boot' && <Card className="p-8">
-            <h3 className="text-xl font-semibold text-cloud-gray-deeper mb-6">
-              Boot Priority Order
-            </h3>
-            <div className="space-y-4">
-              {[{
-            name: 'CloudOS (NVMe Drive)',
-            icon: '💿',
-            primary: true
-          }, {
-            name: 'CloudOS Recovery',
-            icon: '🔧',
-            primary: false
-          }, {
-            name: 'USB Drive',
-            icon: '🔌',
-            primary: false
-          }, {
-            name: 'Network Boot',
-            icon: '🌐',
-            primary: false
-          }].map((device, index) => <div key={index} className={`
-                    flex items-center justify-between p-4 rounded-cloud-lg
-                    ${device.primary ? 'bg-cloud-green/10 border-2 border-cloud-green' : 'bg-cloud-gray/20 border-2 border-transparent'}
-                  `}>
-                  <div className="flex items-center gap-4">
-                    <span className="text-2xl">{device.icon}</span>
-                    <div>
-                      <p className="font-medium text-cloud-gray-deeper">
-                        {device.name}
-                      </p>
-                      <p className="text-sm text-cloud-gray-dark">
-                        Boot Priority: {index + 1}
-                      </p>
-                    </div>
-                  </div>
-                  {device.primary && <span className="px-3 py-1 bg-cloud-green text-white text-sm rounded-full">
-                      Primary
-                    </span>}
-                </div>)}
-            </div>
-          </Card>}
-
-        {activeTab === 'virtualization' && <Card className="p-8">
-            <h3 className="text-xl font-semibold text-cloud-gray-deeper mb-6">
-              Virtualization Settings
-            </h3>
-            <div className="space-y-6">
-              <div className="flex items-center justify-between p-4 bg-cloud-gray/10 rounded-cloud-lg">
-                <div>
-                  <h4 className="font-medium text-cloud-gray-deeper">
-                    Intel VT-x / AMD-V
-                  </h4>
-                  <p className="text-sm text-cloud-gray-dark">
-                    Hardware virtualization support
-                  </p>
-                </div>
-                <Switch checked={virtualization} onChange={setVirtualization} />
-              </div>
-              <div className="flex items-center justify-between p-4 bg-cloud-gray/10 rounded-cloud-lg">
-                <div>
-                  <h4 className="font-medium text-cloud-gray-deeper">
-                    VT-d / AMD-Vi
-                  </h4>
-                  <p className="text-sm text-cloud-gray-dark">
-                    I/O virtualization for direct device access
-                  </p>
-                </div>
-                <Switch checked={true} onChange={() => {}} />
-              </div>
-            </div>
-          </Card>}
-
-        {activeTab === 'security' && <Card className="p-8">
-            <h3 className="text-xl font-semibold text-cloud-gray-deeper mb-6">
-              Security Features
-            </h3>
-            <div className="space-y-6">
-              <div className="flex items-center justify-between p-4 bg-cloud-gray/10 rounded-cloud-lg">
-                <div>
-                  <h4 className="font-medium text-cloud-gray-deeper">
-                    Secure Boot
-                  </h4>
-                  <p className="text-sm text-cloud-gray-dark">
-                    Verify bootloader signatures
-                  </p>
-                </div>
-                <Switch checked={secureBoot} onChange={setSecureBoot} />
-              </div>
-              <div className="flex items-center justify-between p-4 bg-cloud-gray/10 rounded-cloud-lg">
-                <div>
-                  <h4 className="font-medium text-cloud-gray-deeper">
-                    TPM 2.0
-                  </h4>
-                  <p className="text-sm text-cloud-gray-dark">
-                    Trusted Platform Module
-                  </p>
-                </div>
-                <Switch checked={true} onChange={() => {}} />
-              </div>
-              <div className="flex items-center justify-between p-4 bg-cloud-gray/10 rounded-cloud-lg">
-                <div>
-                  <h4 className="font-medium text-cloud-gray-deeper">
-                    Fast Boot
-                  </h4>
-                  <p className="text-sm text-cloud-gray-dark">
-                    Skip hardware checks for faster startup
-                  </p>
-                </div>
-                <Switch checked={fastBoot} onChange={setFastBoot} />
-              </div>
-            </div>
-          </Card>}
-
-        {activeTab === 'diagnostics' && <Card className="p-8">
-            <h3 className="text-xl font-semibold text-cloud-gray-deeper mb-6">
-              System Diagnostics
-            </h3>
-            <div className="grid grid-cols-2 gap-4">
-              {[{
-            label: 'CPU Test',
-            status: 'Passed',
-            color: 'text-cloud-green'
-          }, {
-            label: 'Memory Test',
-            status: 'Passed',
-            color: 'text-cloud-green'
-          }, {
-            label: 'Storage Test',
-            status: 'Passed',
-            color: 'text-cloud-green'
-          }, {
-            label: 'Graphics Test',
-            status: 'Passed',
-            color: 'text-cloud-green'
-          }, {
-            label: 'Network Test',
-            status: 'Passed',
-            color: 'text-cloud-green'
-          }, {
-            label: 'USB Ports',
-            status: 'Passed',
-            color: 'text-cloud-green'
-          }].map((test, index) => <div key={index} className="flex items-center justify-between p-4 bg-cloud-gray/10 rounded-cloud-lg">
-                  <span className="font-medium text-cloud-gray-deeper">
-                    {test.label}
-                  </span>
-                  <span className={`font-semibold ${test.color}`}>
-                    {test.status}
-                  </span>
-                </div>)}
-            </div>
-            <Button variant="secondary" className="w-full mt-6">
-              Run Full Diagnostic
-            </Button>
-          </Card>}
-      </div>
-
-      {/* Footer Actions */}
-      <div className="flex items-center justify-between">
-        <div className="flex gap-3">
-          <Button variant="secondary">Load Defaults</Button>
-          <Button variant="secondary">Save & Exit</Button>
-        </div>
-        <Button variant="primary" onClick={onContinue} className="px-12">
-          Continue to CloudOS
-        </Button>
-      </div>
-    </div>;
+    </div>
+  );
 }

@@ -8,27 +8,27 @@ export default {
   theme: {
     extend: {
       colors: {
-        // CloudOS Color System
+        // macOS-inspired Color System
         cloud: {
-          cream: '#FFF9F0',
-          'cream-dark': '#F5EFE6',
-          green: '#A8D5BA',
-          'green-dark': '#7FB89E',
-          'green-deeper': '#5A9B7D',
-          gray: '#E8EBF0',
-          'gray-dark': '#B8BCC8',
-          'gray-deeper': '#8B8F9B',
-          blue: '#A8C5E0',
-          purple: '#C5B8E0',
-          pink: '#E0B8D5',
+          cream: '#F5F5F7',
+          'cream-dark': '#E8E8ED',
+          green: '#34C759',
+          'green-dark': '#30B350',
+          'green-deeper': '#248A3D',
+          gray: '#F2F2F7',
+          'gray-dark': '#D1D1D6',
+          'gray-deeper': '#8E8E93',
+          blue: '#007AFF',
+          purple: '#AF52DE',
+          pink: '#FF2D55',
         },
         dark: {
-          bg: '#1A1D23',
-          'bg-light': '#23262E',
-          'bg-lighter': '#2C3038',
-          border: '#3A3D45',
-          text: '#E8EBF0',
-          'text-muted': '#B8BCC8',
+          bg: '#1C1C1E',
+          'bg-light': '#2C2C2E',
+          'bg-lighter': '#3A3A3C',
+          border: '#48484A',
+          text: '#F2F2F7',
+          'text-muted': '#98989D',
         }
       },
       borderRadius: {
