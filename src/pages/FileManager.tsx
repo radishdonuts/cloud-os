@@ -3,7 +3,7 @@ import { Window } from '../components/layout/Window';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
-import { FolderIcon, FileTextIcon, ImageIcon, VideoIcon, MusicIcon, HomeIcon, DownloadIcon, CloudIcon, UsbIcon, ChevronRightIcon, Grid3x3Icon, ListIcon, SearchIcon, ChevronLeftIcon, PlusIcon, TrashIcon, Edit2Icon, FolderPlusIcon, FilePlusIcon } from 'lucide-react';
+import { FolderIcon, FileTextIcon, ImageIcon, VideoIcon, MusicIcon, HomeIcon, DownloadIcon, CloudIcon, UsbIcon, ChevronRightIcon, Grid3x3Icon, ListIcon, SearchIcon, ChevronLeftIcon, TrashIcon, Edit2Icon, FolderPlusIcon, FilePlusIcon, CheckSquare, Square, Trash2Icon } from 'lucide-react';
 export interface FileManagerProps {
   onClose: () => void;
   initialCategory?: Category;
@@ -49,6 +49,7 @@ export function FileManager({
   const [searchQuery, setSearchQuery] = useState('');
   const [renamingFile, setRenamingFile] = useState<string | null>(null);
   const [newName, setNewName] = useState('');
+  const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
   const [files, setFiles] = useState<Record<Category, Record<string, FileItem[]>>>({
     home: {
       '': [{
@@ -377,6 +378,7 @@ export function FileManager({
     setSelectedCategory(category);
     setCurrentPath([]);
     setSearchQuery('');
+    setSelectedFiles(new Set());
   };
   const handleFileClick = (file: FileItem) => {
     if (file.type === 'folder') {
@@ -390,6 +392,7 @@ export function FileManager({
         setHistoryIndex(newHistory.length - 1);
         setSelectedCategory(file.linkedCategory);
         setCurrentPath([]);
+        setSelectedFiles(new Set());
       } else {
         const newHistory = history.slice(0, historyIndex + 1);
         newHistory.push({
@@ -399,6 +402,7 @@ export function FileManager({
         setHistory(newHistory);
         setHistoryIndex(newHistory.length - 1);
         setCurrentPath([...currentPath, file.name]);
+        setSelectedFiles(new Set());
       }
     } else if (file.type === 'text' && onOpenNote) {
       onOpenNote('Sample content for ' + file.name, file.name);
@@ -472,6 +476,45 @@ export function FileManager({
       }
     });
     setContextMenu(null);
+  };
+  const handleDeleteSelected = () => {
+    if (selectedFiles.size === 0) return;
+    const pathKey = currentPath.join('/');
+    const currentFiles = files[selectedCategory][pathKey] || [];
+    const filesToDelete = currentFiles.filter(f => selectedFiles.has(f.name));
+    const remainingFiles = currentFiles.filter(f => !selectedFiles.has(f.name));
+    setFiles({
+      ...files,
+      [selectedCategory]: {
+        ...files[selectedCategory],
+        [pathKey]: remainingFiles
+      },
+      trash: {
+        '': [...(files.trash[''] || []), ...filesToDelete.map(f => ({
+          ...f,
+          modified: 'Just now'
+        }))]
+      }
+    });
+    setSelectedFiles(new Set());
+  };
+  const handleToggleSelection = (fileName: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newSelection = new Set(selectedFiles);
+    if (newSelection.has(fileName)) {
+      newSelection.delete(fileName);
+    } else {
+      newSelection.add(fileName);
+    }
+    setSelectedFiles(newSelection);
+  };
+  const handleSelectAll = () => {
+    const currentFiles = getCurrentFiles();
+    if (selectedFiles.size === currentFiles.length) {
+      setSelectedFiles(new Set());
+    } else {
+      setSelectedFiles(new Set(currentFiles.map(f => f.name)));
+    }
   };
   const handleRename = (file: FileItem) => {
     setRenamingFile(file.name);
@@ -547,7 +590,7 @@ export function FileManager({
             const isTrash = cat.id === 'trash';
             return <button key={cat.id} onClick={() => handleCategoryChange(cat.id)} className={`
                     w-full flex items-center justify-between gap-3 px-4 py-3 rounded-cloud-lg transition-all duration-200
-                    ${selectedCategory === cat.id ? 'bg-cloud-green/20 text-cloud-green' : 'text-cloud-gray-dark dark:text-dark-text-muted hover:bg-cloud-gray/20 dark:hover:bg-dark-bg-lighter'}
+                    ${selectedCategory === cat.id ? 'bg-cloud-green/20 text-cloud-green font-semibold' : 'text-cloud-gray-deeper dark:text-dark-text hover:bg-cloud-gray/20 dark:hover:bg-dark-bg-lighter'}
                   `}>
                   <div className="flex items-center gap-3">
                     <Icon size={20} />
@@ -573,21 +616,47 @@ export function FileManager({
                 </Button>
               </div>
 
-              <div className="flex items-center gap-2 text-sm text-cloud-gray-dark dark:text-dark-text-muted flex-1">
+              {filteredFiles.length > 0 && (
+                <button 
+                  onClick={handleSelectAll}
+                  className="p-2 hover:bg-cloud-gray/20 dark:hover:bg-dark-bg-lighter rounded-cloud transition-colors"
+                  title={selectedFiles.size === filteredFiles.length ? "Deselect all" : "Select all"}
+                >
+                  {selectedFiles.size === filteredFiles.length && filteredFiles.length > 0 ? (
+                    <CheckSquare size={18} className="text-cloud-green" />
+                  ) : (
+                    <Square size={18} className="text-cloud-gray-deeper dark:text-dark-text" />
+                  )}
+                </button>
+              )}
+
+              {selectedFiles.size > 0 && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={handleDeleteSelected}
+                  className="text-red-500 hover:bg-red-500/10"
+                >
+                  <Trash2Icon size={18} />
+                  <span className="ml-2">Delete ({selectedFiles.size})</span>
+                </Button>
+              )}
+
+              <div className="flex items-center gap-2 text-sm text-cloud-gray-deeper dark:text-dark-text flex-1">
                 <CategoryIcon size={16} />
-                <button onClick={() => handleBreadcrumbClick(-1)} className="hover:text-cloud-green transition-colors">
+                <button onClick={() => handleBreadcrumbClick(-1)} className="hover:text-cloud-green transition-colors font-medium">
                   {categories.find(c => c.id === selectedCategory)?.label}
                 </button>
                 {currentPath.map((folder, i) => <Fragment key={i}>
                     <ChevronRightIcon size={16} />
-                    <button onClick={() => handleBreadcrumbClick(i)} className={`hover:text-cloud-green transition-colors ${i === currentPath.length - 1 ? 'font-medium text-cloud-gray-deeper dark:text-dark-text' : ''}`}>
+                    <button onClick={() => handleBreadcrumbClick(i)} className={`hover:text-cloud-green transition-colors ${i === currentPath.length - 1 ? 'font-semibold text-cloud-gray-deeper dark:text-dark-text' : 'font-medium'}`}>
                       {folder}
                     </button>
                   </Fragment>)}
               </div>
 
               <div className="relative w-64">
-                <SearchIcon size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-cloud-gray-dark" />
+                <SearchIcon size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-cloud-gray-deeper dark:text-dark-text-muted" />
                 <Input placeholder="Search files..." className="pl-10" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
               </div>
 
@@ -604,37 +673,61 @@ export function FileManager({
             {/* Files Grid/List */}
             <div className="flex-1 overflow-auto p-6" onContextMenu={e => handleContextMenu(e)}>
               {filteredFiles.length === 0 ? <div className="flex flex-col items-center justify-center h-full text-center">
-                  <FolderIcon size={64} className="text-cloud-gray-dark mb-4 opacity-50" />
-                  <p className="text-lg font-medium text-cloud-gray-deeper dark:text-dark-text mb-2">
+                  <FolderIcon size={64} className="text-cloud-gray-deeper/40 dark:text-dark-text-muted mb-4" />
+                  <p className="text-lg font-semibold text-cloud-gray-deeper dark:text-dark-text mb-2">
                     {searchQuery ? 'No files found' : 'This folder is empty'}
                   </p>
-                  <p className="text-sm text-cloud-gray-dark dark:text-dark-text-muted mb-4">
+                  <p className="text-sm text-cloud-gray-deeper/70 dark:text-dark-text-muted mb-4 font-medium">
                     {searchQuery ? 'Try a different search term' : 'Right-click to create files or folders'}
                   </p>
                 </div> : view === 'grid' ? <div className="grid grid-cols-4 gap-4">
-                  {filteredFiles.map((file, i) => <Card key={i} hover className="p-4 cursor-pointer" onClick={() => handleFileClick(file)} onContextMenu={e => handleContextMenu(e, file)}>
-                      <div className="flex flex-col items-center text-center">
-                        {renamingFile === file.name ? <Input value={newName} onChange={e => setNewName(e.target.value)} onBlur={() => handleRenameSubmit(file.name)} onKeyDown={e => {
-                    if (e.key === 'Enter') handleRenameSubmit(file.name);
-                    if (e.key === 'Escape') setRenamingFile(null);
-                  }} autoFocus className="mb-3 text-center" onClick={e => e.stopPropagation()} /> : <>
-                            <div className="w-16 h-16 rounded-cloud-lg bg-cloud-green/20 flex items-center justify-center mb-3">
-                              {file.type === 'folder' ? <FolderIcon size={32} className="text-cloud-green" /> : file.type === 'pdf' ? <FileTextIcon size={32} className="text-red-500" /> : file.type === 'doc' ? <FileTextIcon size={32} className="text-blue-500" /> : file.type === 'image' ? <ImageIcon size={32} className="text-cloud-pink" /> : file.type === 'video' ? <VideoIcon size={32} className="text-cloud-purple" /> : file.type === 'music' ? <MusicIcon size={32} className="text-cloud-blue" /> : <FileTextIcon size={32} className="text-cloud-blue" />}
-                            </div>
-                            <p className="font-medium text-cloud-gray-deeper dark:text-dark-text text-sm mb-1 line-clamp-2">
-                              {file.name}
-                            </p>
-                          </>}
-                        <div className="flex items-center gap-2 text-xs text-cloud-gray-dark dark:text-dark-text-muted">
-                          <span>
-                            {file.type === 'folder' ? `${file.items} items` : file.size}
-                          </span>
-                          {file.synced && <CloudIcon size={12} className="text-cloud-green" />}
+                  {filteredFiles.map((file, i) => <div key={i} onContextMenu={(e: React.MouseEvent) => handleContextMenu(e, file)}>
+                      <Card hover className={`p-4 cursor-pointer relative ${selectedFiles.has(file.name) ? 'ring-2 ring-cloud-green' : ''}`} onClick={() => handleFileClick(file)}>
+                        <div className="absolute top-2 right-2 z-10">
+                          <button
+                            onClick={(e) => handleToggleSelection(file.name, e)}
+                            className="p-1 hover:bg-cloud-gray/20 dark:hover:bg-dark-bg-lighter rounded"
+                          >
+                            {selectedFiles.has(file.name) ? (
+                              <CheckSquare size={20} className="text-cloud-green" />
+                            ) : (
+                              <Square size={20} className="text-cloud-gray-deeper/50 dark:text-dark-text-muted" />
+                            )}
+                          </button>
                         </div>
-                      </div>
-                    </Card>)}
+                        <div className="flex flex-col items-center text-center">
+                          {renamingFile === file.name ? <Input value={newName} onChange={e => setNewName(e.target.value)} onBlur={() => handleRenameSubmit(file.name)} onKeyDown={e => {
+                      if (e.key === 'Enter') handleRenameSubmit(file.name);
+                      if (e.key === 'Escape') setRenamingFile(null);
+                    }} autoFocus className="mb-3 text-center" onClick={e => e.stopPropagation()} /> : <>
+                              <div className="w-16 h-16 rounded-cloud-lg bg-cloud-green/20 flex items-center justify-center mb-3">
+                                {file.type === 'folder' ? <FolderIcon size={32} className="text-cloud-green" /> : file.type === 'pdf' ? <FileTextIcon size={32} className="text-red-500" /> : file.type === 'doc' ? <FileTextIcon size={32} className="text-blue-500" /> : file.type === 'image' ? <ImageIcon size={32} className="text-cloud-pink" /> : file.type === 'video' ? <VideoIcon size={32} className="text-cloud-purple" /> : file.type === 'music' ? <MusicIcon size={32} className="text-cloud-blue" /> : <FileTextIcon size={32} className="text-cloud-blue" />}
+                              </div>
+                              <p className="font-semibold text-cloud-gray-deeper dark:text-dark-text text-sm mb-1 line-clamp-2">
+                                {file.name}
+                              </p>
+                            </>}
+                          <div className="flex items-center gap-2 text-xs text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
+                            <span>
+                              {file.type === 'folder' ? `${file.items} items` : file.size}
+                            </span>
+                            {file.synced && <CloudIcon size={12} className="text-cloud-green" />}
+                          </div>
+                        </div>
+                      </Card>
+                    </div>)}
                 </div> : <div className="space-y-2">
-                  {filteredFiles.map((file, i) => <div key={i} onClick={() => handleFileClick(file)} onContextMenu={e => handleContextMenu(e, file)} className="flex items-center gap-4 px-4 py-3 bg-white/50 dark:bg-dark-bg-lighter/50 hover:bg-white dark:hover:bg-dark-bg-lighter rounded-cloud-lg transition-colors cursor-pointer">
+                  {filteredFiles.map((file, i) => <div key={i} onClick={() => handleFileClick(file)} onContextMenu={(e: React.MouseEvent) => handleContextMenu(e, file)} className={`flex items-center gap-4 px-4 py-3 bg-white/50 dark:bg-dark-bg-lighter/50 hover:bg-white dark:hover:bg-dark-bg-lighter rounded-cloud-lg transition-colors cursor-pointer ${selectedFiles.has(file.name) ? 'ring-2 ring-cloud-green' : ''}`}>
+                      <button
+                        onClick={(e) => handleToggleSelection(file.name, e)}
+                        className="p-1 hover:bg-cloud-gray/20 dark:hover:bg-dark-bg-lighter rounded"
+                      >
+                        {selectedFiles.has(file.name) ? (
+                          <CheckSquare size={20} className="text-cloud-green" />
+                        ) : (
+                          <Square size={20} className="text-cloud-gray-deeper/50 dark:text-dark-text-muted" />
+                        )}
+                      </button>
                       <div className="w-10 h-10 rounded-cloud bg-cloud-green/20 flex items-center justify-center">
                         {file.type === 'folder' ? <FolderIcon size={20} className="text-cloud-green" /> : file.type === 'image' ? <ImageIcon size={20} className="text-cloud-pink" /> : file.type === 'pdf' ? <FileTextIcon size={20} className="text-red-500" /> : <FileTextIcon size={20} className="text-cloud-blue" />}
                       </div>
@@ -643,10 +736,10 @@ export function FileManager({
                     if (e.key === 'Enter') handleRenameSubmit(file.name);
                     if (e.key === 'Escape') setRenamingFile(null);
                   }} autoFocus onClick={e => e.stopPropagation()} /> : <>
-                            <p className="font-medium text-cloud-gray-deeper dark:text-dark-text">
+                            <p className="font-semibold text-cloud-gray-deeper dark:text-dark-text">
                               {file.name}
                             </p>
-                            <p className="text-sm text-cloud-gray-dark dark:text-dark-text-muted">
+                            <p className="text-sm text-cloud-gray-deeper/70 dark:text-dark-text-muted font-medium">
                               {file.type === 'folder' ? `${file.items} items` : file.size}{' '}
                               • {file.modified}
                             </p>

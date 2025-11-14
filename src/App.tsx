@@ -19,17 +19,20 @@ import { StorageManager } from './pages/StorageManager';
 import { Settings } from './pages/Settings';
 import { AppStore } from './pages/AppStore';
 import { GameMode } from './pages/GameMode';
+import { CloudDrive } from './pages/CloudDrive';
 
 type Screen = 'bios' | 'boot' | 'login' | 'account-creation' | 'desktop';
-type App = 'files' | 'photos' | 'notes' | 'pdf-viewer' | 'document-viewer' | 'device-manager' | 'process-manager' | 'memory-manager' | 'storage-manager' | 'settings' | 'app-store' | 'game-mode' | null;
+type App = 'files' | 'photos' | 'notes' | 'pdf-viewer' | 'document-viewer' | 'device-manager' | 'process-manager' | 'memory-manager' | 'storage-manager' | 'settings' | 'app-store' | 'game-mode' | 'cloud-drive' | null;
 
 export interface User {
   id: string;
   name: string;
   avatar: string;
+  profilePhoto?: string; // Optional profile photo path
   wallpaper: {
     gradient: string;
     accent?: string;
+    image?: string; // Optional wallpaper image
   };
   desktopApps: Array<{
     name: string;
@@ -51,15 +54,17 @@ export function App() {
       id: '1',
       name: 'John Doe',
       avatar: 'JD',
+      profilePhoto: '/icons/tiger1.png', // Add your photo here
       wallpaper: {
         gradient: 'from-blue-500 via-blue-400 to-cyan-400',
-        accent: 'blue'
+        accent: 'blue',
+        image: '/icons/DesktopWallpaper5.png'
       },
       desktopApps: [
         { name: 'Documents', type: 'folder', icon: 'folder', image: '/icons/Folder2.png' },
         { name: 'Projects', type: 'folder', icon: 'folder', image: '/icons/Folder2.png' },
-        { name: 'Photos', type: 'app', icon: 'image' },
-        { name: 'Work Notes', type: 'file', icon: 'note' }
+        { name: 'Photos', type: 'app', icon: 'image', image: '/icons/Frame.png' },
+        { name: 'Work Notes', type: 'file', icon: 'note', image: '/icons/Note.png' }
       ],
       notes: [
         { title: 'Work Notes', content: 'Meeting with team at 3 PM\nReview project proposals\nUpdate documentation' },
@@ -71,14 +76,16 @@ export function App() {
       id: '2',
       name: 'Juan Paolo',
       avatar: 'JP',
+      profilePhoto: '/icons/profile2.jpg', // Add your photo here
       wallpaper: {
         gradient: 'from-pink-500 via-purple-500 to-indigo-500',
-        accent: 'purple'
+        accent: 'purple',
+        image: '/icons/DesktopWallpaper1.jpg'
       },
       desktopApps: [
         { name: 'Design Files', type: 'folder', icon: 'folder', image: '/icons/Folder2.png' },
         { name: 'Artwork', type: 'folder', icon: 'folder', image: '/icons/Folder2.png' },
-        { name: 'Creative Notes', type: 'file', icon: 'note' }
+        { name: 'Creative Notes', type: 'file', icon: 'note', image: '/icons/Note.png' }
       ],
       notes: [
         { title: 'Creative Ideas', content: 'New design concepts:\n- Minimalist UI\n- Pastel color scheme\n- Animated transitions' },
@@ -90,6 +97,7 @@ export function App() {
       id: '3',
       name: 'Crispy Pata',
       avatar: 'CP',
+      profilePhoto: '/icons/profile3.jpg', // Add your photo here
       wallpaper: {
         gradient: 'from-green-600 via-emerald-500 to-teal-500',
         accent: 'green'
@@ -98,7 +106,7 @@ export function App() {
         { name: 'Code', type: 'folder', icon: 'folder', image: '/icons/Folder2.png' },
         { name: 'DevOps', type: 'folder', icon: 'folder', image: '/icons/Folder2.png' },
         { name: 'Gaming', type: 'app', icon: 'game' },
-        { name: 'Tech Notes', type: 'file', icon: 'note' }
+        { name: 'Tech Notes', type: 'file', icon: 'note', image: '/icons/Note.png' }
       ],
       notes: [
         { title: 'Crispy Pata', content: 'Docker commands:\ndocker ps\ndocker-compose up\nkubectl get pods' },
@@ -119,6 +127,10 @@ export function App() {
   const [pdfFileName, setPdfFileName] = useState('');
   const [documentFileName, setDocumentFileName] = useState('');
   const [trashCount, setTrashCount] = useState(0);
+  
+  // Cloud Drive state
+  const [cloudFileCount] = useState(4);
+  const [cloudSyncStatus, setCloudSyncStatus] = useState<'idle' | 'syncing' | 'synced'>('synced');
 
   const handleUserLogin = (user: User) => {
     setCurrentUser(user);
@@ -204,7 +216,9 @@ export function App() {
             onAppOpen={handleAppOpen} 
             onQuickSettingsOpen={() => setShowQuickSettings(true)} 
             onNotificationsOpen={() => setShowNotifications(true)} 
-            trashCount={trashCount} 
+            trashCount={trashCount}
+            cloudFileCount={cloudFileCount}
+            cloudSyncStatus={cloudSyncStatus}
           />
 
           {showQuickSettings && <QuickSettings onClose={() => setShowQuickSettings(false)} onOpenSettings={() => {
@@ -242,6 +256,8 @@ export function App() {
           {openApp === 'app-store' && <AppStore onClose={() => setOpenApp(null)} />}
 
           {openApp === 'game-mode' && <GameMode onClose={() => setOpenApp(null)} />}
+
+          {openApp === 'cloud-drive' && <CloudDrive onClose={() => setOpenApp(null)} />}
         </>}
     </div>;
 }

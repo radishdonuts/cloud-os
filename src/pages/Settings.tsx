@@ -97,7 +97,7 @@ export function Settings({
             const Icon = cat.icon;
             return <button key={cat.id} onClick={() => setSelectedCategory(cat.id)} className={`
                     w-full flex items-center gap-3 px-4 py-3 rounded-cloud-lg transition-all duration-200
-                    ${selectedCategory === cat.id ? 'bg-cloud-green/20 text-cloud-green' : 'text-cloud-gray-dark dark:text-dark-text-muted hover:bg-cloud-gray/20 dark:hover:bg-dark-bg-lighter'}
+                    ${selectedCategory === cat.id ? 'bg-cloud-green/20 text-cloud-green font-semibold' : 'text-cloud-gray-deeper dark:text-dark-text hover:bg-cloud-gray/20 dark:hover:bg-dark-bg-lighter'}
                   `}>
                   <Icon size={20} />
                   <span className="font-medium">{cat.label}</span>
@@ -115,10 +115,10 @@ export function Settings({
                   <div className="space-y-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium text-cloud-gray-deeper dark:text-dark-text">
+                        <p className="font-semibold text-cloud-gray-deeper dark:text-dark-text">
                           Dark Mode
                         </p>
-                        <p className="text-sm text-cloud-gray-dark dark:text-dark-text-muted">
+                        <p className="text-sm text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
                           Use dark theme across the system
                         </p>
                       </div>
@@ -126,7 +126,7 @@ export function Settings({
                     </div>
 
                     <div>
-                      <p className="font-medium text-cloud-gray-deeper dark:text-dark-text mb-3">
+                      <p className="font-semibold text-cloud-gray-deeper dark:text-dark-text mb-3">
                         Accent Color
                       </p>
                       <div className="flex gap-3">
@@ -137,7 +137,7 @@ export function Settings({
                     </div>
 
                     <div>
-                      <p className="font-medium text-cloud-gray-deeper dark:text-dark-text mb-3">
+                      <p className="font-semibold text-cloud-gray-deeper dark:text-dark-text mb-3">
                         Wallpaper
                       </p>
                       <div className="grid grid-cols-5 gap-3">
@@ -158,7 +158,7 @@ export function Settings({
                   </h3>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-cloud-gray-dark dark:text-dark-text-muted mb-2">
+                      <label className="block text-sm font-semibold text-cloud-gray-deeper dark:text-dark-text mb-2">
                         Resolution
                       </label>
                       <select className="w-full px-4 py-3 bg-white/60 dark:bg-dark-bg-lighter/60 border-2 border-cloud-gray/30 dark:border-dark-border rounded-cloud focus:outline-none focus:border-cloud-green text-cloud-gray-deeper dark:text-dark-text">
@@ -168,7 +168,7 @@ export function Settings({
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-cloud-gray-dark dark:text-dark-text-muted mb-2">
+                      <label className="block text-sm font-semibold text-cloud-gray-deeper dark:text-dark-text mb-2">
                         Refresh Rate
                       </label>
                       <select className="w-full px-4 py-3 bg-white/60 dark:bg-dark-bg-lighter/60 border-2 border-cloud-gray/30 dark:border-dark-border rounded-cloud focus:outline-none focus:border-cloud-green text-cloud-gray-deeper dark:text-dark-text">
@@ -189,7 +189,7 @@ export function Settings({
                   <Slider label="Volume" value={volume} onChange={setVolume} />
 
                   <div>
-                    <label className="block text-sm font-medium text-cloud-gray-dark dark:text-dark-text-muted mb-3">
+                    <label className="block text-sm font-semibold text-cloud-gray-deeper dark:text-dark-text mb-3">
                       Output Device
                     </label>
                     <div className="space-y-2">
@@ -222,10 +222,10 @@ export function Settings({
                 <div className="space-y-4">
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <p className="font-medium text-cloud-gray-deeper dark:text-dark-text">
+                      <p className="font-semibold text-cloud-gray-deeper dark:text-dark-text">
                         Wi-Fi
                       </p>
-                      <p className="text-sm text-cloud-gray-dark dark:text-dark-text-muted">
+                      <p className="text-sm text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
                         {wifi ? 'Connected to "Home Network"' : 'Disabled'}
                       </p>
                     </div>
@@ -233,7 +233,7 @@ export function Settings({
                   </div>
 
                   {wifi && <div className="space-y-3 pt-4 border-t border-cloud-gray/20 dark:border-dark-border">
-                      <p className="text-sm font-medium text-cloud-gray-dark dark:text-dark-text-muted mb-3">
+                      <p className="text-sm font-semibold text-cloud-gray-deeper dark:text-dark-text mb-3">
                         Available Networks
                       </p>
                       {[{
@@ -266,10 +266,10 @@ export function Settings({
                                 {network.secured ? '🔒' : '🔓'}
                               </div>
                               <div>
-                                <p className="font-medium text-cloud-gray-deeper dark:text-dark-text">
+                                <p className="font-semibold text-cloud-gray-deeper dark:text-dark-text">
                                   {network.name}
                                 </p>
-                                <p className="text-sm text-cloud-gray-dark dark:text-dark-text-muted">
+                                <p className="text-sm text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
                                   Signal: {network.signal}
                                 </p>
                               </div>
@@ -291,7 +291,7 @@ export function Settings({
                     <h3 className="text-lg font-semibold text-cloud-gray-deeper dark:text-dark-text">
                       Bluetooth
                     </h3>
-                    <p className="text-sm text-cloud-gray-dark dark:text-dark-text-muted">
+                    <p className="text-sm text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
                       {bluetooth ? '2 devices connected' : 'Disabled'}
                     </p>
                   </div>
@@ -300,7 +300,7 @@ export function Settings({
 
                 {bluetooth && <>
                     <div className="mb-6">
-                      <p className="text-sm font-medium text-cloud-gray-dark dark:text-dark-text-muted mb-3">
+                      <p className="text-sm font-semibold text-cloud-gray-deeper dark:text-dark-text mb-3">
                         Paired Devices
                       </p>
                       <div className="space-y-3">
@@ -319,10 +319,10 @@ export function Settings({
                               <div className="flex items-center gap-3">
                                 <div className="text-2xl">🔵</div>
                                 <div>
-                                  <p className="font-medium text-cloud-gray-deeper dark:text-dark-text">
+                                  <p className="font-semibold text-cloud-gray-deeper dark:text-dark-text">
                                     {device.name}
                                   </p>
-                                  <p className="text-sm text-cloud-gray-dark dark:text-dark-text-muted">
+                                  <p className="text-sm text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
                                     {device.type} • {device.battery}% battery
                                   </p>
                                 </div>
@@ -336,7 +336,7 @@ export function Settings({
                     </div>
 
                     <div>
-                      <p className="text-sm font-medium text-cloud-gray-dark dark:text-dark-text-muted mb-3">
+                      <p className="text-sm font-semibold text-cloud-gray-deeper dark:text-dark-text mb-3">
                         Available Devices
                       </p>
                       <div className="space-y-3">
@@ -351,10 +351,10 @@ export function Settings({
                               <div className="flex items-center gap-3">
                                 <div className="text-2xl">⚪</div>
                                 <div>
-                                  <p className="font-medium text-cloud-gray-deeper dark:text-dark-text">
+                                  <p className="font-semibold text-cloud-gray-deeper dark:text-dark-text">
                                     {device.name}
                                   </p>
-                                  <p className="text-sm text-cloud-gray-dark dark:text-dark-text-muted">
+                                  <p className="text-sm text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
                                     {device.type}
                                   </p>
                                 </div>
@@ -375,7 +375,7 @@ export function Settings({
                 </h3>
                 <div className="mb-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-cloud-gray-dark dark:text-dark-text-muted">
+                    <span className="text-sm text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
                       540 GB of 1 TB used
                     </span>
                     <span className="text-sm font-medium text-cloud-gray-deeper dark:text-dark-text">
@@ -405,20 +405,20 @@ export function Settings({
                 <div className="space-y-6">
                   <div className="p-4 bg-cloud-green/10 rounded-cloud-lg">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium text-cloud-gray-deeper dark:text-dark-text">
+                      <span className="font-semibold text-cloud-gray-deeper dark:text-dark-text">
                         Battery Level
                       </span>
                       <span className="text-2xl font-bold text-cloud-green">
                         85%
                       </span>
                     </div>
-                    <p className="text-sm text-cloud-gray-dark dark:text-dark-text-muted">
+                    <p className="text-sm text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
                       4 hours 32 minutes remaining
                     </p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-cloud-gray-dark dark:text-dark-text-muted mb-3">
+                    <label className="block text-sm font-semibold text-cloud-gray-deeper dark:text-dark-text mb-3">
                       Power Mode
                     </label>
                     <div className="space-y-2">
@@ -436,10 +436,10 @@ export function Settings({
                             w-full p-4 rounded-cloud-lg text-left transition-all
                             ${mode.selected ? 'bg-cloud-green/10 border-2 border-cloud-green' : 'bg-cloud-gray/10 dark:bg-dark-bg-lighter/50 border-2 border-transparent hover:bg-cloud-gray/20'}
                           `}>
-                          <p className="font-medium text-cloud-gray-deeper dark:text-dark-text mb-1">
+                          <p className="font-semibold text-cloud-gray-deeper dark:text-dark-text mb-1">
                             {mode.name}
                           </p>
-                          <p className="text-sm text-cloud-gray-dark dark:text-dark-text-muted">
+                          <p className="text-sm text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
                             {mode.desc}
                           </p>
                         </button>)}
@@ -448,10 +448,10 @@ export function Settings({
 
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-cloud-gray-deeper dark:text-dark-text">
+                      <p className="font-semibold text-cloud-gray-deeper dark:text-dark-text">
                         Low Power Mode
                       </p>
-                      <p className="text-sm text-cloud-gray-dark dark:text-dark-text-muted">
+                      <p className="text-sm text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
                         Automatically enable at 20% battery
                       </p>
                     </div>
@@ -467,10 +467,10 @@ export function Settings({
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-cloud-gray-deeper dark:text-dark-text">
+                      <p className="font-semibold text-cloud-gray-deeper dark:text-dark-text">
                         Developer Mode
                       </p>
-                      <p className="text-sm text-cloud-gray-dark dark:text-dark-text-muted">
+                      <p className="text-sm text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
                         Enable advanced development features
                       </p>
                     </div>
@@ -479,10 +479,10 @@ export function Settings({
 
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-cloud-gray-deeper dark:text-dark-text">
+                      <p className="font-semibold text-cloud-gray-deeper dark:text-dark-text">
                         Show Hidden Files
                       </p>
-                      <p className="text-sm text-cloud-gray-dark dark:text-dark-text-muted">
+                      <p className="text-sm text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
                         Display system and hidden files
                       </p>
                     </div>
@@ -491,10 +491,10 @@ export function Settings({
 
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-cloud-gray-deeper dark:text-dark-text">
+                      <p className="font-semibold text-cloud-gray-deeper dark:text-dark-text">
                         USB Debugging
                       </p>
-                      <p className="text-sm text-cloud-gray-dark dark:text-dark-text-muted">
+                      <p className="text-sm text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
                         Allow debugging via USB connection
                       </p>
                     </div>
@@ -513,50 +513,50 @@ export function Settings({
                 </h3>
                 <div className="space-y-4">
                   <div className="flex justify-between">
-                    <span className="text-cloud-gray-dark dark:text-dark-text-muted">
+                    <span className="text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
                       Device Name
                     </span>
-                    <span className="font-medium text-cloud-gray-deeper dark:text-dark-text">
+                    <span className="font-semibold text-cloud-gray-deeper dark:text-dark-text">
                       CloudOS Computer
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-cloud-gray-dark dark:text-dark-text-muted">
+                    <span className="text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
                       OS Version
                     </span>
-                    <span className="font-medium text-cloud-gray-deeper dark:text-dark-text">
+                    <span className="font-semibold text-cloud-gray-deeper dark:text-dark-text">
                       CloudOS 2.1.0
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-cloud-gray-dark dark:text-dark-text-muted">
+                    <span className="text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
                       Processor
                     </span>
-                    <span className="font-medium text-cloud-gray-deeper dark:text-dark-text">
+                    <span className="font-semibold text-cloud-gray-deeper dark:text-dark-text">
                       Intel Core i7-12700K
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-cloud-gray-dark dark:text-dark-text-muted">
+                    <span className="text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
                       Memory
                     </span>
-                    <span className="font-medium text-cloud-gray-deeper dark:text-dark-text">
+                    <span className="font-semibold text-cloud-gray-deeper dark:text-dark-text">
                       16 GB
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-cloud-gray-dark dark:text-dark-text-muted">
+                    <span className="text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
                       Graphics
                     </span>
-                    <span className="font-medium text-cloud-gray-deeper dark:text-dark-text">
+                    <span className="font-semibold text-cloud-gray-deeper dark:text-dark-text">
                       NVIDIA RTX 4070
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-cloud-gray-dark dark:text-dark-text-muted">
+                    <span className="text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
                       Serial Number
                     </span>
-                    <span className="font-medium text-cloud-gray-deeper dark:text-dark-text">
+                    <span className="font-semibold text-cloud-gray-deeper dark:text-dark-text">
                       C02XYZ123456
                     </span>
                   </div>
@@ -575,7 +575,7 @@ export function Settings({
                     <p className="font-semibold text-cloud-gray-deeper dark:text-dark-text">
                       John Doe
                     </p>
-                    <p className="text-sm text-cloud-gray-dark dark:text-dark-text-muted">
+                    <p className="text-sm text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
                       john.doe@cloudos.com
                     </p>
                   </div>
@@ -587,10 +587,10 @@ export function Settings({
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-cloud-gray-deeper dark:text-dark-text">
+                      <p className="font-semibold text-cloud-gray-deeper dark:text-dark-text">
                         Auto Sync
                       </p>
-                      <p className="text-sm text-cloud-gray-dark dark:text-dark-text-muted">
+                      <p className="text-sm text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
                         Automatically sync files to cloud
                       </p>
                     </div>
@@ -599,7 +599,7 @@ export function Settings({
 
                   <div className="p-4 bg-cloud-gray/10 dark:bg-dark-bg-lighter/50 rounded-cloud-lg">
                     <div className="flex items-center justify-between mb-2">
-                      <p className="text-sm font-medium text-cloud-gray-dark dark:text-dark-text-muted">
+                      <p className="text-sm font-semibold text-cloud-gray-deeper dark:text-dark-text">
                         Storage Used
                       </p>
                       <p className="text-sm font-semibold text-cloud-gray-deeper dark:text-dark-text">
@@ -622,10 +622,10 @@ export function Settings({
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-cloud-gray-deeper dark:text-dark-text">
+                      <p className="font-semibold text-cloud-gray-deeper dark:text-dark-text">
                         Notifications
                       </p>
-                      <p className="text-sm text-cloud-gray-dark dark:text-dark-text-muted">
+                      <p className="text-sm text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
                         Show system notifications
                       </p>
                     </div>
@@ -634,10 +634,10 @@ export function Settings({
 
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-cloud-gray-deeper dark:text-dark-text">
+                      <p className="font-semibold text-cloud-gray-deeper dark:text-dark-text">
                         Location Services
                       </p>
-                      <p className="text-sm text-cloud-gray-dark dark:text-dark-text-muted">
+                      <p className="text-sm text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
                         Allow apps to access your location
                       </p>
                     </div>
@@ -646,10 +646,10 @@ export function Settings({
 
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-cloud-gray-deeper dark:text-dark-text">
+                      <p className="font-semibold text-cloud-gray-deeper dark:text-dark-text">
                         Analytics
                       </p>
-                      <p className="text-sm text-cloud-gray-dark dark:text-dark-text-muted">
+                      <p className="text-sm text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
                         Share usage data to improve CloudOS
                       </p>
                     </div>
@@ -665,10 +665,10 @@ export function Settings({
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-cloud-gray-deeper dark:text-dark-text">
+                      <p className="font-semibold text-cloud-gray-deeper dark:text-dark-text">
                         Increase Contrast
                       </p>
-                      <p className="text-sm text-cloud-gray-dark dark:text-dark-text-muted">
+                      <p className="text-sm text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
                         Make text and UI elements more visible
                       </p>
                     </div>
@@ -677,10 +677,10 @@ export function Settings({
 
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-cloud-gray-deeper dark:text-dark-text">
+                      <p className="font-semibold text-cloud-gray-deeper dark:text-dark-text">
                         Reduce Motion
                       </p>
-                      <p className="text-sm text-cloud-gray-dark dark:text-dark-text-muted">
+                      <p className="text-sm text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
                         Minimize animations and transitions
                       </p>
                     </div>
@@ -689,10 +689,10 @@ export function Settings({
 
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-cloud-gray-deeper dark:text-dark-text">
+                      <p className="font-semibold text-cloud-gray-deeper dark:text-dark-text">
                         Screen Reader
                       </p>
-                      <p className="text-sm text-cloud-gray-dark dark:text-dark-text-muted">
+                      <p className="text-sm text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
                         Enable voice feedback for UI elements
                       </p>
                     </div>

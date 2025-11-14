@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { CloudIcon } from '../components/ui/CloudIcon';
-import { ProgressRing } from '../components/ui/ProgressRing';
+import { useEffect, useState } from 'react';
+
 export function BootScreen({
   onComplete
 }: {
@@ -20,18 +19,31 @@ export function BootScreen({
     }, 50);
     return () => clearInterval(interval);
   }, [onComplete]);
-  return <div className="w-full min-h-screen bg-white flex flex-col items-center justify-center">
+  return <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-cyan-50 flex flex-col items-center justify-center">
       {/* Main Content */}
       <div className="flex flex-col items-center animate-fade-in">
-        <div className="mb-6">
-          <CloudIcon size={80} />
+        <div className="mb-12">
+          <img 
+            src="/icons/CloudOS Icon.png" 
+            alt="CloudOS" 
+            className="w-[400px] h-auto"
+          />
         </div>
 
-        <h1 className="text-4xl font-semibold text-gray-900 mb-12">
-          CloudOS
-        </h1>
-
-        <ProgressRing progress={progress} size={120} strokeWidth={8} />
+        {/* Progress Bar */}
+        <div className="w-80">
+          <div className="h-2 bg-gray-200/50 rounded-full overflow-hidden backdrop-blur-sm">
+            <div 
+              className="h-full bg-gradient-to-r from-blue-400 via-blue-500 to-cyan-500 rounded-full transition-all duration-300 ease-out shadow-lg"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <div className="mt-3 text-center">
+            <span className="text-sm font-medium text-gray-600">
+              {Math.round(progress)}%
+            </span>
+          </div>
+        </div>
       </div>
     </div>;
 }

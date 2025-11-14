@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { CloudDriveIsland } from '../components/desktop/CloudDriveIsland';
 import { Dock } from '../components/desktop/Dock';
 import { SystemTray } from '../components/desktop/SystemTray';
 import { AppIcon } from '../components/desktop/AppIcon';
@@ -12,13 +12,17 @@ export interface DesktopProps {
   onQuickSettingsOpen: () => void;
   onNotificationsOpen: () => void;
   trashCount?: number;
+  cloudFileCount?: number;
+  cloudSyncStatus?: 'idle' | 'syncing' | 'synced';
 }
 export function Desktop({
   currentUser,
   onAppOpen,
   onQuickSettingsOpen,
   onNotificationsOpen,
-  trashCount = 0
+  trashCount = 0,
+  cloudFileCount = 0,
+  cloudSyncStatus = 'idle'
 }: DesktopProps) {
   // Generate desktop apps based on user data
   const desktopApps = currentUser.desktopApps.map(app => {
@@ -60,10 +64,18 @@ export function Desktop({
       action
     };
   });
-  return <div className={`w-full min-h-screen bg-gradient-to-br ${currentUser.wallpaper.gradient} relative overflow-hidden transition-all duration-500`}>
+  return <div className={`w-full min-h-screen ${currentUser.wallpaper.image ? '' : `bg-gradient-to-br ${currentUser.wallpaper.gradient}`} relative overflow-hidden transition-all duration-500`}>
+      {/* Background Image */}
+      {currentUser.wallpaper.image && (
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: `url('${currentUser.wallpaper.image}')` }}
+        />
+      )}
+      
       {/* Animated Background Clouds */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(12)].map((_, i) => <div key={i} className="absolute opacity-10" style={{
+        {[...Array(12)].map((_, i) => <div key={i} className={`absolute ${currentUser.wallpaper.image ? 'opacity-5' : 'opacity-10'}`} style={{
         left: `${Math.random() * 100}%`,
         top: `${Math.random() * 100}%`,
         animation: `float ${12 + Math.random() * 8}s ease-in-out infinite`,
@@ -72,6 +84,13 @@ export function Desktop({
             <CloudIcon size={60 + Math.random() * 100} />
           </div>)}
       </div>
+
+      {/* Cloud Drive Island */}
+      <CloudDriveIsland
+        onOpenManager={() => onAppOpen('cloud-drive')}
+        fileCount={cloudFileCount}
+        syncStatus={cloudSyncStatus}
+      />
 
       {/* Desktop Icons */}
       <div className="relative z-10 p-8 grid grid-cols-8 gap-4 content-start">

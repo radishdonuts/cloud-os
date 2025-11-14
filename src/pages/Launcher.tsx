@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { CloudIcon } from '../components/ui/CloudIcon';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { FolderIcon, ImageIcon, SettingsIcon, MonitorIcon, CpuIcon, HardDriveIcon, ShoppingBagIcon, GamepadIcon, PowerIcon, MoonIcon, LogOutIcon, FileTextIcon, SearchIcon, UsersIcon } from 'lucide-react';
+import { FolderIcon, ImageIcon, SettingsIcon, MonitorIcon, CpuIcon, HardDriveIcon, ShoppingBagIcon, GamepadIcon, PowerIcon, MoonIcon, LogOutIcon, FileTextIcon, SearchIcon, UsersIcon, CloudIcon } from 'lucide-react';
 export interface LauncherProps {
   onClose: () => void;
   onAppOpen: (app: string) => void;
@@ -35,6 +34,11 @@ export function Launcher({
     name: 'Notes',
     icon: FileTextIcon,
     color: 'from-cloud-green to-cloud-blue'
+  }, {
+    id: 'cloud-drive',
+    name: 'Cloud Drive',
+    icon: CloudIcon,
+    color: 'from-cyan-400 to-blue-500'
   }, {
     id: 'settings',
     name: 'Settings',
@@ -76,7 +80,7 @@ export function Launcher({
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <CloudIcon size={48} />
+            <img src="/icons/CloudIcon.png" alt="Cloud" className="w-12 h-12" />
             <div>
               <h2 className="text-2xl font-bold text-cloud-gray-deeper dark:text-dark-text">
                 All Apps

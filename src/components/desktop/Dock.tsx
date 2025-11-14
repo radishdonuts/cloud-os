@@ -1,5 +1,3 @@
-import React from 'react';
-import { CloudIcon } from '../ui/CloudIcon';
 import { FolderIcon, ImageIcon, SettingsIcon, Grid3x3Icon, MonitorIcon, CpuIcon, HardDriveIcon, ShoppingBagIcon, TrashIcon, FileTextIcon } from 'lucide-react';
 export interface DockProps {
   onAppClick: (app: string) => void;
@@ -53,7 +51,7 @@ export function Dock({
       <div className="bg-white/60 dark:bg-dark-bg-light/60 backdrop-blur-cloud rounded-cloud-xl shadow-cloud-lg border border-cloud-gray/30 dark:border-dark-border px-3 py-3 flex items-center gap-2">
         {/* Cloud Launcher */}
         <button onClick={() => onAppClick('launcher')} className="group relative w-14 h-14 rounded-cloud-lg bg-gradient-to-br from-cloud-green to-cloud-green-dark hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center shadow-cloud">
-          <CloudIcon size={28} className="text-white" />
+          <img src="/icons/CloudIcon.png" alt="Cloud" className="w-7 h-7" />
           <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-3 py-1 bg-dark-bg-light text-white text-xs rounded-cloud opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
             Launcher
           </div>

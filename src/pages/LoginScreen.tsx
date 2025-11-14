@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { Avatar } from '../components/ui/Avatar';
 import { CloudIcon } from '../components/ui/CloudIcon';
-import { PowerIcon, KeyboardIcon, EyeIcon, EyeOffIcon, ChevronLeftIcon } from 'lucide-react';
+import { PowerIcon, KeyboardIcon, EyeIcon, EyeOffIcon, ArrowLeftIcon, PlusIcon } from 'lucide-react';
 import { User } from '../App';
 
 export function LoginScreen({
@@ -15,8 +14,7 @@ export function LoginScreen({
   onLogin: (user: User) => void;
   onCreateAccount: () => void;
 }) {
-  const [selectedUser, setSelectedUser] = useState<User | null>(users[0] || null);
-  const [showUserList, setShowUserList] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showPowerMenu, setShowPowerMenu] = useState(false);
@@ -27,20 +25,28 @@ export function LoginScreen({
     }
   };
 
-  const handleSwitchUser = () => {
-    setShowUserList(true);
+  const handleSelectUser = (user: User) => {
+    setSelectedUser(user);
     setPassword('');
   };
 
-  const handleSelectUser = (user: User) => {
-    setSelectedUser(user);
-    setShowUserList(false);
+  const handleBack = () => {
+    setSelectedUser(null);
     setPassword('');
   };
-  return <div className="w-full min-h-screen bg-gradient-to-br from-cloud-cream via-cloud-green/20 to-cloud-blue/20 flex items-center justify-center relative overflow-hidden">
-      {/* Animated Background */}
+  return <div className="w-full min-h-screen flex items-center justify-center relative overflow-hidden">
+      {/* Background Image */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url('/icons/hills.jpg')" }}
+      />
+      
+      {/* Overlay for better readability */}
+      <div className="absolute inset-0 bg-black/10" />
+
+      {/* Animated Background Clouds */}
       <div className="absolute inset-0 overflow-hidden">
-        {[...Array(8)].map((_, i) => <div key={i} className="absolute opacity-10" style={{
+        {[...Array(8)].map((_, i) => <div key={i} className="absolute opacity-5" style={{
         left: `${Math.random() * 100}%`,
         top: `${Math.random() * 100}%`,
         animation: `float ${10 + Math.random() * 5}s ease-in-out infinite`,
@@ -74,25 +80,89 @@ export function LoginScreen({
         </div>
       </div>
 
-      {/* Login Card */}
-      <div className="relative z-10 w-full max-w-md px-6 animate-fade-in">
-        {!showUserList && selectedUser ? (
+      {/* macOS-Style User Selection */}
+      {!selectedUser ? (
+        <div className="relative z-10 w-full max-w-5xl px-6 animate-fade-in">
+          {/* User Grid - macOS Style */}
+          <div className="flex items-center justify-center gap-8 mb-8">
+            {users.map(user => (
+              <button
+                key={user.id}
+                onClick={() => handleSelectUser(user)}
+                className="group flex flex-col items-center gap-4 p-8 rounded-cloud-xl bg-white/40 backdrop-blur-sm hover:bg-white/60 transition-all duration-300 hover:scale-105 hover:shadow-cloud-lg min-w-[200px]"
+              >
+                {/* Large Avatar */}
+                <div className="relative">
+                  {user.profilePhoto ? (
+                    <div className="w-32 h-32 rounded-full shadow-cloud-lg group-hover:shadow-cloud-xl transition-all duration-300 overflow-hidden">
+                      <img 
+                        src={user.profilePhoto} 
+                        alt={user.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className={`w-32 h-32 rounded-full bg-gradient-to-br ${user.wallpaper.gradient} flex items-center justify-center text-white text-4xl font-bold shadow-cloud-lg group-hover:shadow-cloud-xl transition-all duration-300`}>
+                      {user.avatar}
+                    </div>
+                  )}
+                </div>
+
+                {/* User Name */}
+                <div className="text-center">
+                  <h3 className="text-xl font-semibold text-cloud-gray-deeper group-hover:text-cloud-green transition-colors">
+                    {user.name}
+                  </h3>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {/* Create Account - Bottom Center */}
+          <div className="text-center">
+            <button 
+              onClick={onCreateAccount} 
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-cloud-lg bg-white/40 backdrop-blur-sm hover:bg-white/60 text-cloud-gray-deeper hover:text-cloud-green font-semibold transition-all duration-200 shadow-cloud hover:shadow-cloud-lg"
+            >
+              <PlusIcon size={20} />
+              Create a new account
+            </button>
+          </div>
+        </div>
+      ) : (
+        /* Password Entry Screen */
+        <div className="relative z-10 w-full max-w-md px-6 animate-fade-in">
           <div className="bg-white/80 backdrop-blur-cloud rounded-cloud-xl shadow-cloud-lg p-8 border border-cloud-gray/20">
-            {/* Logo */}
-            <div className="flex justify-center mb-6">
-              <CloudIcon size={80} />
-            </div>
+            {/* Back Button */}
+            <button 
+              onClick={handleBack}
+              className="absolute top-4 left-4 p-2 hover:bg-cloud-gray/20 rounded-cloud transition-colors"
+            >
+              <ArrowLeftIcon size={20} className="text-cloud-gray-deeper" />
+            </button>
 
             {/* User Avatar */}
-            <div className="flex justify-center mb-6">
-              <Avatar size="xl" fallback={selectedUser.avatar} online />
+            <div className="flex justify-center mb-4 mt-4">
+              {selectedUser.profilePhoto ? (
+                <div className="w-24 h-24 rounded-full shadow-cloud-lg overflow-hidden">
+                  <img 
+                    src={selectedUser.profilePhoto} 
+                    alt={selectedUser.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className={`w-24 h-24 rounded-full bg-gradient-to-br ${selectedUser.wallpaper.gradient} flex items-center justify-center text-white text-3xl font-bold shadow-cloud-lg`}>
+                  {selectedUser.avatar}
+                </div>
+              )}
             </div>
 
             {/* User Name */}
             <h2 className="text-2xl font-semibold text-center text-cloud-gray-deeper mb-2">
               {selectedUser.name}
             </h2>
-            <p className="text-center text-cloud-gray-dark mb-8">
+            <p className="text-center text-cloud-gray-deeper/70 mb-6 font-medium">
               Welcome back to CloudOS
             </p>
 
@@ -103,11 +173,12 @@ export function LoginScreen({
                 placeholder="Enter your password" 
                 value={password} 
                 onChange={e => setPassword(e.target.value)} 
-                onKeyPress={e => e.key === 'Enter' && handleLogin()} 
+                onKeyPress={e => e.key === 'Enter' && handleLogin()}
+                autoFocus
               />
               <button 
                 onClick={() => setShowPassword(!showPassword)} 
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-cloud-gray-dark hover:text-cloud-gray-deeper transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-cloud-gray-deeper/70 hover:text-cloud-gray-deeper transition-colors"
               >
                 {showPassword ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
               </button>
@@ -118,70 +189,14 @@ export function LoginScreen({
               Sign In
             </Button>
 
-            {/* Additional Options */}
-            <div className="flex items-center justify-between text-sm">
-              <button className="text-cloud-gray-dark hover:text-cloud-green transition-colors">
+            {/* Forgot Password */}
+            <div className="text-center">
+              <button className="text-cloud-gray-deeper/70 hover:text-cloud-green transition-colors text-sm font-medium">
                 Forgot password?
               </button>
-              <button 
-                onClick={handleSwitchUser}
-                className="text-cloud-gray-dark hover:text-cloud-green transition-colors"
-              >
-                Switch user
-              </button>
             </div>
           </div>
-        ) : (
-          <div className="bg-white/80 backdrop-blur-cloud rounded-cloud-xl shadow-cloud-lg p-8 border border-cloud-gray/20">
-            {/* Logo */}
-            <div className="flex justify-center mb-6">
-              <CloudIcon size={80} />
-            </div>
-
-            <h2 className="text-2xl font-semibold text-center text-cloud-gray-deeper mb-2">
-              Select User
-            </h2>
-            <p className="text-center text-cloud-gray-dark mb-8">
-              Who's using CloudOS?
-            </p>
-
-            {/* User List */}
-            <div className="space-y-3 mb-6">
-              {users.map(user => (
-                <button
-                  key={user.id}
-                  onClick={() => handleSelectUser(user)}
-                  className="w-full flex items-center gap-4 p-4 rounded-cloud-lg bg-cloud-gray/10 hover:bg-cloud-green/20 transition-all duration-200 border-2 border-transparent hover:border-cloud-green"
-                >
-                  <Avatar size="md" fallback={user.avatar} />
-                  <div className="flex-1 text-left">
-                    <div className="font-semibold text-cloud-gray-deeper">{user.name}</div>
-                    <div className="text-sm text-cloud-gray-dark">Click to sign in</div>
-                  </div>
-                </button>
-              ))}
-            </div>
-
-            {/* Back Button */}
-            <Button 
-              variant="secondary" 
-              className="w-full"
-              onClick={() => setShowUserList(false)}
-            >
-              <ChevronLeftIcon size={18} className="mr-2" />
-              Back
-            </Button>
-          </div>
-        )}
-
-        {/* Create Account */}
-        {!showUserList && (
-          <div className="mt-6 text-center">
-            <button onClick={onCreateAccount} className="text-cloud-gray-deeper hover:text-cloud-green font-medium transition-colors">
-              Create a new account
-            </button>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>;
 }
