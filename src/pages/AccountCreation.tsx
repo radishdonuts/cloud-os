@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Avatar } from '../components/ui/Avatar';
@@ -19,7 +19,6 @@ export function AccountCreation({
   const [theme, setTheme] = useState<'light' | 'dark' | 'pastel'>('light');
   const steps: Step[] = ['welcome', 'name', 'avatar', 'password', 'cloud', 'theme', 'complete'];
   const currentStepIndex = steps.indexOf(step);
-  const progress = (currentStepIndex + 1) / steps.length * 100;
   const avatarOptions = [{
     color: 'from-cloud-green to-cloud-blue',
     icon: '🌟'

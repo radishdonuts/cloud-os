@@ -4,9 +4,9 @@ import { FILE_MANAGER_ROOTS } from './FileManager';
 
 export interface TerminalProps {
   onClose: () => void;
-  onMinimize?: () => void;
   onMaximize?: () => void;
   maximized?: boolean;
+  zIndex?: number;
 }
 
 type HistoryItem = {
@@ -14,7 +14,7 @@ type HistoryItem = {
   output: string[];
 };
 
-export function Terminal({ onClose }: TerminalProps) {
+export function Terminal({ onClose, onMaximize, maximized = false, zIndex = 40 }: TerminalProps) {
   const [input, setInput] = useState('');
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const outputRef = useRef<HTMLDivElement | null>(null);
@@ -96,7 +96,7 @@ export function Terminal({ onClose }: TerminalProps) {
 
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center p-6 bg-black/20 backdrop-blur-sm animate-fade-in">
-      <Window title="Terminal" onClose={onClose} onMinimize={arguments[0].onMinimize} onMaximize={arguments[0].onMaximize} maximized={arguments[0].maximized ?? false} width="w-full max-w-3xl" height="h-[60vh]">
+      <Window title="Terminal" onClose={onClose} onMaximize={onMaximize} maximized={maximized} zIndex={zIndex} width="w-full max-w-3xl" height="h-[60vh]">
         <div className="p-4 h-full flex flex-col">
           <div className="flex-1 overflow-auto bg-black rounded-cloud p-4 font-mono text-sm text-cloud-green/90" ref={outputRef}>
             {history.length === 0 && <div className="text-cloud-gray-dark dark:text-dark-text-muted">cloudos@device:~$ Type `help` to see available commands</div>}

@@ -6,15 +6,15 @@ import { ProgressRing } from '../components/ui/ProgressRing';
 import { MemoryStickIcon, AlertCircleIcon, CheckCircleIcon, TrendingUpIcon } from 'lucide-react';
 export interface MemoryManagerProps {
   onClose: () => void;
-  onMinimize?: () => void;
   onMaximize?: () => void;
   maximized?: boolean;
+  zIndex?: number;
 }
 export function MemoryManager({
   onClose,
-  onMinimize,
   onMaximize,
-  maximized = false
+  maximized = false,
+  zIndex = 40
 }: MemoryManagerProps) {
   const [optimizing, setOptimizing] = useState(false);
   const handleOptimize = () => {
@@ -22,7 +22,7 @@ export function MemoryManager({
     setTimeout(() => setOptimizing(false), 2000);
   };
   return <div className="fixed inset-0 z-40 flex items-center justify-center p-6 bg-black/20 backdrop-blur-sm animate-fade-in">
-      <Window title="Memory Manager" onClose={onClose} onMinimize={onMinimize} onMaximize={onMaximize} maximized={maximized} width="w-full max-w-4xl" height="h-[80vh]">
+      <Window title="Memory Manager" onClose={onClose} onMaximize={onMaximize} maximized={maximized} zIndex={zIndex} width="w-full max-w-4xl" height="h-[80vh]">
         <div className="p-6 space-y-6">
           {/* Memory Overview */}
           <div className="grid grid-cols-3 gap-6">

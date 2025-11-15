@@ -21,10 +21,15 @@ import { Terminal } from './pages/Terminal';
 import { AppStore } from './pages/AppStore';
 import { GameMode } from './pages/GameMode';
 import { CloudDrive } from './pages/CloudDrive';
+import { Calculator } from './pages/Calculator';
+import { Trash } from './pages/Trash';
+import { GameLibrary } from './pages/GameLibrary';
+import { Browser } from './pages/Browser';
+import { Game } from './pages/Game';
 
 type Screen = 'bios' | 'boot' | 'login' | 'account-creation' | 'desktop';
-type App = 'files' | 'photos' | 'notes' | 'pdf-viewer' | 'document-viewer' | 'device-manager' | 'process-manager' | 'memory-manager' | 'storage-manager' | 'settings' | 'app-store' | 'game-mode' | 'cloud-drive' | 'terminal' | null;
-
+type App = 'files' | 'photos' | 'notes' | 'pdf-viewer' | 'document-viewer' | 'device-manager' | 'process-manager' | 'memory-manager' | 'storage-manager' | 'settings' | 
+'app-store' | 'game-mode' | 'cloud-drive' | 'terminal' | 'calculator' | 'trash' | 'game-library' | 'browser' | 'game' | null;
 export interface User {
   id: string;
   name: string;
@@ -47,9 +52,11 @@ export interface User {
 
 export function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('bios');
-  const [openApp, setOpenApp] = useState<App>(null);
-  const [minimizedApp, setMinimizedApp] = useState<App | null>(null);
+  const [openApps, setOpenApps] = useState<App[]>([]);
   const [maximizedApp, setMaximizedApp] = useState<App | null>(null);
+  const [cloudOSDriveIslandEnabled, setCloudOSDriveIslandEnabled] = useState(true);
+  const [wifiEnabled, setWifiEnabled] = useState(true);
+  const [selectedGameTitle, setSelectedGameTitle] = useState<string>('Genshin Impact');
 
   // User management
   const [users] = useState<User[]>([
@@ -148,9 +155,10 @@ export function App() {
   const handleSwitchUser = () => {
     setCurrentUser(null);
     setCurrentScreen('login');
-    setOpenApp(null);
+    setOpenApps([]);
     setShowLauncher(false);
   };
+
   const handleAppOpen = (appId: string) => {
     if (appId === 'launcher') {
       setShowLauncher(true);
@@ -163,44 +171,58 @@ export function App() {
     // Handle special file manager routes
     if (appId === 'files-documents') {
       setFileManagerCategory('documents');
-      setOpenApp('files');
+      setOpenApps(prev => prev.includes('files') ? prev : [...prev, 'files']);
       return;
     }
     if (appId === 'files-desktop') {
       setFileManagerCategory('desktop');
-      setOpenApp('files');
+      setOpenApps(prev => prev.includes('files') ? prev : [...prev, 'files']);
       return;
     }
-    if (appId === 'trash') {
-      setFileManagerCategory('trash');
-      setOpenApp('files');
-      return;
-    }
-    if (appId === 'files') setOpenApp('files');else if (appId === 'photos') setOpenApp('photos');else if (appId === 'notes') setOpenApp('notes');else if (appId === 'device-manager') setOpenApp('device-manager');else if (appId === 'process-manager') setOpenApp('process-manager');else if (appId === 'memory-manager') setOpenApp('memory-manager');else if (appId === 'storage-manager') setOpenApp('storage-manager');else if (appId === 'settings') setOpenApp('settings');else if (appId === 'app-store') setOpenApp('app-store');else if (appId === 'game-mode') setOpenApp('game-mode');
+    // Add app to open apps if not already open
+    let appToOpen: App = null;
+    if (appId === 'files') appToOpen = 'files';
+    else if (appId === 'photos') appToOpen = 'photos';
+    else if (appId === 'notes') appToOpen = 'notes';
+    else if (appId === 'calculator') appToOpen = 'calculator';
+    else if (appId === 'device-manager') appToOpen = 'device-manager';
+    else if (appId === 'process-manager') appToOpen = 'process-manager';
+    else if (appId === 'memory-manager') appToOpen = 'memory-manager';
+    else if (appId === 'storage-manager') appToOpen = 'storage-manager';
+    else if (appId === 'settings') appToOpen = 'settings';
+    else if (appId === 'app-store') appToOpen = 'app-store';
+    else if (appId === 'game-mode') appToOpen = 'game-mode';
+    else if (appId === 'terminal') appToOpen = 'terminal';
+    else if (appId === 'trash') appToOpen = 'trash';
+    else if (appId === 'game-library') appToOpen = 'game-library';
+    else if (appId === 'browser') appToOpen = 'browser';
+    else if (appId === 'game') appToOpen = 'game';
 
-    if (appId === 'terminal') setOpenApp('terminal');
+    if (appToOpen) {
+      setOpenApps(prev => prev.includes(appToOpen) ? prev : [...prev, appToOpen]);
+    }
   };
   const handleOpenPhoto = (folder: string) => {
     setPhotoFolder(folder);
-    setOpenApp('photos');
+    setOpenApps(prev => prev.includes('photos') ? prev : [...prev, 'photos']);
   };
   const handleOpenNote = (content: string, title: string) => {
     setNoteContent(content);
     setNoteTitle(title);
-    setOpenApp('notes');
+    setOpenApps(prev => prev.includes('notes') ? prev : [...prev, 'notes']);
   };
   const handleOpenPDF = (fileName: string) => {
     setPdfFileName(fileName);
-    setOpenApp('pdf-viewer');
+    setOpenApps(prev => prev.includes('pdf-viewer') ? prev : [...prev, 'pdf-viewer']);
   };
   const handleOpenDocument = (fileName: string) => {
     setDocumentFileName(fileName);
-    setOpenApp('document-viewer');
+    setOpenApps(prev => prev.includes('document-viewer') ? prev : [...prev, 'document-viewer']);
   };
   const handleLogout = () => {
     setCurrentUser(null);
     setCurrentScreen('login');
-    setOpenApp(null);
+    setOpenApps([]);
     setShowLauncher(false);
   };
   const handleSleep = () => {
@@ -208,16 +230,30 @@ export function App() {
   };
   const handleShutdown = () => {
     setCurrentScreen('bios');
-    setOpenApp(null);
+    setOpenApps([]);
     setShowLauncher(false);
   };
 
-  const handleMinimize = (app: App) => {
-    setMinimizedApp(app);
-  };
   const handleMaximize = (app: App) => {
     setMaximizedApp(app === maximizedApp ? null : app);
   };
+  const handleCloseApp = (app: App) => {
+    setOpenApps(prev => prev.filter(a => a !== app));
+    if (maximizedApp === app) {
+      setMaximizedApp(null);
+    }
+  };
+
+  const getZIndex = (app: App) => {
+    const index = openApps.indexOf(app);
+    return index === -1 ? 0 : 40 + index;
+  };
+
+  const [bluetoothEnabled, setBluetoothEnabled] = useState(true);
+  const [pairedDevices, setPairedDevices] = useState([
+    { name: 'PlayStation 5 Controller', type: 'Game Controller', battery: 85, connected: true },
+    { name: 'AirPods Pro', type: 'Audio', battery: 72, connected: true },
+  ]);
 
   const handleWallpaperChange = (id: number) => {
   setSelectedWallpaper(id);
@@ -233,8 +269,6 @@ export function App() {
   setAccentColor(accentMap[id] ?? '#A8D5BA');
   };
 
-
-  const showAppWindow = (app: App) => openApp === app && minimizedApp !== app;
 
   return (
     <div className={`w-full min-h-screen ${darkMode ? 'dark' : ''}`}>
@@ -252,86 +286,99 @@ export function App() {
           cloudFileCount={cloudFileCount}
           cloudSyncStatus={cloudSyncStatus}
           maximizedApp={maximizedApp}
+          cloudOSDriveIslandEnabled={cloudOSDriveIslandEnabled}
         />
         {showQuickSettings && (
           <QuickSettings
             onClose={() => setShowQuickSettings(false)}
             onOpenSettings={() => {
               setShowQuickSettings(false);
-              setOpenApp('settings');
+              setOpenApps(prev => prev.includes('settings') ? prev : [...prev, 'settings']);
             }}
             darkMode={darkMode}
             onDarkModeChange={setDarkMode}
+            cloudOSDriveIslandEnabled={cloudOSDriveIslandEnabled}
+            onCloudOSDriveIslandChange={setCloudOSDriveIslandEnabled}
+            wifiEnabled={wifiEnabled}
+            onWifiChange={setWifiEnabled}
           />
         )}
         {showNotifications && <Notifications onClose={() => setShowNotifications(false)} />}
         {showLauncher && <Launcher onClose={() => setShowLauncher(false)} onAppOpen={handleAppOpen} onLogout={handleLogout} onSwitchUser={handleSwitchUser} onSleep={handleSleep} onShutdown={handleShutdown} />}
-        {showAppWindow('files') && <FileManager 
-          onClose={() => { setOpenApp(null); setFileManagerCategory('home'); }} 
+        {openApps.includes('files') && <FileManager 
+          onClose={() => { handleCloseApp('files'); setFileManagerCategory('home'); }} 
           initialCategory={fileManagerCategory} 
           onOpenPhoto={handleOpenPhoto} 
           onOpenNote={handleOpenNote} 
           onOpenPDF={handleOpenPDF} 
           onOpenDocument={handleOpenDocument}
-          onMinimize={() => handleMinimize('files')}
           onMaximize={() => handleMaximize('files')}
           maximized={maximizedApp === 'files'}
+          zIndex={getZIndex('files')}
         />}
-        {showAppWindow('photos') && <Photos 
-          onClose={() => setOpenApp(null)} 
+        {openApps.includes('photos') && <Photos 
+          onClose={() => handleCloseApp('photos')} 
           initialFolder={photoFolder}
-          onMinimize={() => handleMinimize('photos')}
           onMaximize={() => handleMaximize('photos')}
           maximized={maximizedApp === 'photos'}
+          zIndex={getZIndex('photos')}
         />}
-        {showAppWindow('notes') && <Notes 
-          onClose={() => setOpenApp(null)} 
+        {openApps.includes('notes') && <Notes 
+          onClose={() => handleCloseApp('notes')} 
           initialContent={noteContent} 
           initialTitle={noteTitle}
-          onMinimize={() => handleMinimize('notes')}
           onMaximize={() => handleMaximize('notes')}
           maximized={maximizedApp === 'notes'}
+          zIndex={getZIndex('notes')}
         />}
-        {showAppWindow('pdf-viewer') && <PDFViewer 
-          onClose={() => setOpenApp(null)} 
+        {openApps.includes('calculator') && <Calculator 
+          onClose={() => handleCloseApp('calculator')} 
+          onMaximize={() => handleMaximize('calculator')}
+          maximized={maximizedApp === 'calculator'}
+          zIndex={getZIndex('calculator')}
+        />}
+        {openApps.includes('pdf-viewer') && <PDFViewer 
+          onClose={() => handleCloseApp('pdf-viewer')} 
           fileName={pdfFileName}
-          onMinimize={() => handleMinimize('pdf-viewer')}
           onMaximize={() => handleMaximize('pdf-viewer')}
           maximized={maximizedApp === 'pdf-viewer'}
+          zIndex={getZIndex('pdf-viewer')}
         />}
-        {showAppWindow('document-viewer') && <DocumentViewer 
-          onClose={() => setOpenApp(null)} 
+        {openApps.includes('document-viewer') && <DocumentViewer 
+          onClose={() => handleCloseApp('document-viewer')} 
           fileName={documentFileName}
-          onMinimize={() => handleMinimize('document-viewer')}
           onMaximize={() => handleMaximize('document-viewer')}
           maximized={maximizedApp === 'document-viewer'}
+          zIndex={getZIndex('document-viewer')}
         />}
-        {showAppWindow('device-manager') && <DeviceManager 
-          onClose={() => setOpenApp(null)} 
-          onMinimize={() => handleMinimize('device-manager')}
+        {openApps.includes('device-manager') && <DeviceManager 
+          onClose={() => handleCloseApp('device-manager')} 
           onMaximize={() => handleMaximize('device-manager')}
           maximized={maximizedApp === 'device-manager'}
+          zIndex={getZIndex('device-manager')}
         />}
-        {showAppWindow('process-manager') && <ProcessManager 
-          onClose={() => setOpenApp(null)} 
-          onMinimize={() => handleMinimize('process-manager')}
+        {openApps.includes('process-manager') && <ProcessManager 
+          onClose={() => handleCloseApp('process-manager')} 
           onMaximize={() => handleMaximize('process-manager')}
           maximized={maximizedApp === 'process-manager'}
+          zIndex={getZIndex('process-manager')}
         />}
-        {showAppWindow('memory-manager') && <MemoryManager 
-          onClose={() => setOpenApp(null)} 
+        {openApps.includes('memory-manager') && <MemoryManager 
+          onClose={() => handleCloseApp('memory-manager')} 
           onMaximize={() => handleMaximize('memory-manager')}
           maximized={maximizedApp === 'memory-manager'}
+          zIndex={getZIndex('memory-manager')}
         />}
-        {showAppWindow('storage-manager') && <StorageManager 
-          onClose={() => setOpenApp(null)} 
+        {openApps.includes('storage-manager') && <StorageManager 
+          onClose={() => handleCloseApp('storage-manager')} 
           onMaximize={() => handleMaximize('storage-manager')}
           maximized={maximizedApp === 'storage-manager'}
+          zIndex={getZIndex('storage-manager')}
         />}
-        {showAppWindow('settings') && <Settings 
-          onClose={() => setOpenApp(null)} 
-          onOpenStorageManager={() => setOpenApp('storage-manager')} 
-          onOpenTerminal={() => setOpenApp('terminal')}
+        {openApps.includes('settings') && <Settings 
+          onClose={() => handleCloseApp('settings')} 
+          onOpenStorageManager={() => setOpenApps(prev => prev.includes('storage-manager') ? prev : [...prev, 'storage-manager'])} 
+          onOpenTerminal={() => setOpenApps(prev => prev.includes('terminal') ? prev : [...prev, 'terminal'])}
           darkMode={darkMode}
           onDarkModeChange={setDarkMode}
           accentColor={accentColor}
@@ -340,25 +387,88 @@ export function App() {
           onWallpaperChange={handleWallpaperChange}
           onMaximize={() => handleMaximize('settings')}
           maximized={maximizedApp === 'settings'}
+          cloudOSDriveIslandEnabled={cloudOSDriveIslandEnabled}
+          onCloudOSDriveIslandChange={setCloudOSDriveIslandEnabled}
+          wifiEnabled={wifiEnabled}
+          onWifiChange={setWifiEnabled}
+          zIndex={getZIndex('settings')}
+          bluetoothEnabled={bluetoothEnabled}
+          onBluetoothChange={setBluetoothEnabled}
+          pairedDevices={pairedDevices}
+          onPairedDevicesChange={setPairedDevices}
         />}
-        {showAppWindow('terminal') && <Terminal 
-          onClose={() => setOpenApp(null)} 
+        {openApps.includes('terminal') && <Terminal 
+          onClose={() => handleCloseApp('terminal')} 
           onMaximize={() => handleMaximize('terminal')}
           maximized={maximizedApp === 'terminal'}
+          zIndex={getZIndex('terminal')}
         />}
-        {showAppWindow('app-store') && <AppStore 
-          onClose={() => setOpenApp(null)} 
+        {openApps.includes('app-store') && <AppStore 
+          onClose={() => handleCloseApp('app-store')} 
           onMaximize={() => handleMaximize('app-store')}
           maximized={maximizedApp === 'app-store'}
+          zIndex={getZIndex('app-store')}
         />}
-        {showAppWindow('game-mode') && <GameMode 
-          onClose={() => setOpenApp(null)} 
+        {openApps.includes('game-mode') && <GameMode 
+          onClose={() => handleCloseApp('game-mode')} 
           onMaximize={() => handleMaximize('game-mode')}
           maximized={maximizedApp === 'game-mode'}
+          zIndex={getZIndex('game-mode')}
+          bluetoothEnabled={bluetoothEnabled}
+          controllers={pairedDevices}
+          onToggleController={(name) => {
+            setPairedDevices(prev =>
+              prev.map(d =>
+                d.name === name
+                  ? { ...d, connected: !d.connected }
+                  : d
+              )
+            );
+          }}
         />}
-        {showAppWindow('cloud-drive') && <CloudDrive 
-          onClose={() => setOpenApp(null)} 
+        {openApps.includes('cloud-drive') && <CloudDrive 
+          onClose={() => handleCloseApp('cloud-drive')}
+          zIndex={getZIndex('cloud-drive')}
         />}
+        {openApps.includes('trash') && (
+          <Trash
+            onClose={() => handleCloseApp('trash')}
+            onMaximize={() => handleMaximize('trash')}
+            maximized={maximizedApp === 'trash'}
+            zIndex={getZIndex('trash')}
+          />
+        )}
+        {openApps.includes('game-library') && (
+          <GameLibrary
+            onClose={() => handleCloseApp('game-library')}
+            onMaximize={() => handleMaximize('game-library')}
+            maximized={maximizedApp === 'game-library'}
+            onPlayGame={(gameName) => {
+              setSelectedGameTitle(gameName);
+              setOpenApps(prev => prev.includes('game') ? prev : [...prev, 'game']);
+              setMaximizedApp('game');
+            }}
+            zIndex={getZIndex('game-library')}
+          />
+        )}
+        {openApps.includes('browser') && (
+          <Browser
+            wifiEnabled={wifiEnabled}
+            onClose={() => handleCloseApp('browser')}
+            onMaximize={() => handleMaximize('browser')}
+            maximized={maximizedApp === 'browser'}
+            zIndex={getZIndex('browser')}
+          />
+        )}
+        {openApps.includes('game') && (
+          <Game
+            gameTitle={selectedGameTitle}
+            onClose={() => handleCloseApp('game')}
+            onMaximize={() => handleMaximize('game')}
+            maximized={maximizedApp === 'game'}
+            zIndex={getZIndex('game')}
+          />
+        )}
       </>}
     </div>
   );

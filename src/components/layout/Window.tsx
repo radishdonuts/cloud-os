@@ -1,36 +1,37 @@
-import React from 'react';
-import { XIcon, MinusIcon, MaximizeIcon } from 'lucide-react';
+import { XIcon, MaximizeIcon } from 'lucide-react';
 export interface WindowProps {
   title: string;
   children: React.ReactNode;
   onClose?: () => void;
-  onMinimize?: () => void;
   onMaximize?: () => void;
   width?: string;
   height?: string;
   maximized?: boolean;
+  zIndex?: number;
 }
 export function Window({
   title,
   children,
   onClose,
-  onMinimize,
   onMaximize,
   width = 'w-full',
   height = 'h-full',
-  maximized = false
+  maximized = false,
+  zIndex = 40
 }: WindowProps) {
   return <div className={`
-      ${maximized ? 'fixed inset-0 z-50 w-screen h-screen' : `${width} ${height}`}
+      ${maximized ? `fixed inset-0 w-screen h-screen` : `absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ${width} ${height}`}
       bg-white/90 dark:bg-dark-bg/90
-      backdrop-blur-cloud
+      backdrop-blur-sm
       rounded-cloud-xl
       shadow-cloud-lg
       border border-cloud-gray/20 dark:border-dark-border
       overflow-hidden
       flex flex-col
       ${maximized ? 'transition-all duration-300' : ''}
-    `}>
+    `}
+      style={{ zIndex: maximized ? 50 : zIndex }}
+    >
       {/* Title Bar */}
       <div className="
         flex items-center justify-between 
@@ -42,15 +43,6 @@ export function Window({
           {title}
         </h2>
         <div className="flex items-center gap-2">
-          {onMinimize && <button onClick={onMinimize} className="
-                w-8 h-8 rounded-full 
-                bg-cloud-gray/30 dark:bg-dark-bg-lighter
-                hover:bg-cloud-gray/50 dark:hover:bg-dark-bg-lighter
-                flex items-center justify-center
-                transition-all duration-200
-              ">
-              <MinusIcon size={16} className="text-cloud-gray-deeper dark:text-dark-text" />
-            </button>}
           {onMaximize && <button onClick={onMaximize} className="
                 w-8 h-8 rounded-full 
                 bg-cloud-gray/30 dark:bg-dark-bg-lighter

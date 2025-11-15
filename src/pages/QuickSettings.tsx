@@ -1,26 +1,31 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Card } from '../components/ui/Card';
-import { Switch } from '../components/ui/Switch';
 import { Slider } from '../components/ui/Slider';
 import { Button } from '../components/ui/Button';
-import { WifiIcon, BluetoothIcon, AirplayIcon, MoonIcon, SunIcon, Volume2Icon, BatteryIcon, MonitorIcon, XIcon } from 'lucide-react';
+import { WifiIcon, BluetoothIcon, CloudIcon, MoonIcon, SunIcon, Volume2Icon, BatteryIcon, MonitorIcon, XIcon } from 'lucide-react';
 export interface QuickSettingsProps {
   onClose: () => void;
   onOpenSettings?: () => void;
   darkMode: boolean;
   onDarkModeChange: (value: boolean) => void;
+  cloudOSDriveIslandEnabled: boolean;
+  onCloudOSDriveIslandChange: (value: boolean) => void;
+  wifiEnabled: boolean;
+  onWifiChange: (value: boolean) => void;
 }
 export function QuickSettings({
   onClose,
   onOpenSettings,
   darkMode,
-  onDarkModeChange
+  onDarkModeChange,
+  cloudOSDriveIslandEnabled,
+  onCloudOSDriveIslandChange,
+  wifiEnabled,
+  onWifiChange,
 }: QuickSettingsProps) {
-  const [wifi, setWifi] = useState(true);
   const [bluetooth, setBluetooth] = useState(true);
   const [volume, setVolume] = useState(60);
   const [brightness, setBrightness] = useState(80);
-  const [airplayOn, setAirplayOn] = useState(false);
   const handleOpenSettings = () => {
     onClose();
     if (onOpenSettings) {
@@ -41,16 +46,19 @@ export function QuickSettings({
 
         {/* Quick Toggles */}
         <div className="grid grid-cols-2 gap-3 mb-6">
-          <button onClick={() => setWifi(!wifi)} className={`
+          <button
+            onClick={() => onWifiChange(!wifiEnabled)}
+            className={`
               p-4 rounded-cloud-lg transition-all duration-200
-              ${wifi ? 'bg-cloud-green/20 border-2 border-cloud-green' : 'bg-cloud-gray/20 border-2 border-transparent'}
-            `}>
-            <WifiIcon size={24} className={wifi ? 'text-cloud-green' : 'text-cloud-gray-dark'} />
+              ${wifiEnabled ? 'bg-cloud-green/20 border-2 border-cloud-green' : 'bg-cloud-gray/20 border-2 border-transparent'}
+            `}
+          >
+            <WifiIcon size={24} className={wifiEnabled ? 'text-cloud-green' : 'text-cloud-gray-dark'} />
             <p className="text-sm font-medium text-cloud-gray-deeper dark:text-dark-text mt-2">
               Wi-Fi
             </p>
             <p className="text-xs text-cloud-gray-dark dark:text-dark-text-muted">
-              {wifi ? 'Connected' : 'Off'}
+              {wifiEnabled ? 'Connected' : 'Off'}
             </p>
           </button>
 
@@ -68,23 +76,23 @@ export function QuickSettings({
           </button>
 
           <button
-            onClick={() => setAirplayOn(!airplayOn)}
+            onClick={() => onCloudOSDriveIslandChange(!cloudOSDriveIslandEnabled)}
             className={`
               p-4 rounded-cloud-lg transition-all duration-200
-              ${airplayOn
-                ? 'bg-cloud-purple/20 border-2 border-cloud-purple'
+              ${cloudOSDriveIslandEnabled
+                ? 'bg-cloud-blue/20 border-2 border-cloud-blue'
                 : 'bg-cloud-gray/20 border-2 border-transparent hover:bg-cloud-gray/30'}
             `}
           >
-            <AirplayIcon
+            <CloudIcon
               size={24}
-              className={airplayOn ? 'text-cloud-purple' : 'text-cloud-gray-dark'}
+              className={cloudOSDriveIslandEnabled ? 'text-cloud-blue' : 'text-cloud-gray-dark'}
             />
             <p className="text-sm font-medium text-cloud-gray-deeper dark:text-dark-text mt-2">
-              AirPlay
+              CloudOS Drive
             </p>
             <p className="text-xs text-cloud-gray-dark dark:text-dark-text-muted">
-              {airplayOn ? 'Casting Enabled' : 'Off'}
+              {cloudOSDriveIslandEnabled ? 'Enabled' : 'Off'}
             </p>
           </button>
 

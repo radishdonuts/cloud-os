@@ -6,9 +6,9 @@ import { CheckCircleIcon, AlertCircleIcon, XCircleIcon, BluetoothIcon, MonitorIc
 
 export interface DeviceManagerProps {
   onClose: () => void;
-  onMinimize?: () => void;
   onMaximize?: () => void;
   maximized?: boolean;
+  zIndex?: number;
 }
 
 type DeviceStatus = 'working' | 'warning' | 'error' | 'disabled';
@@ -24,9 +24,9 @@ interface Device {
 
 export function DeviceManager({
   onClose,
-  onMinimize,
   onMaximize,
-  maximized = false
+  maximized = false,
+  zIndex = 40
 }: DeviceManagerProps) {
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
   const [showBluetoothPairing, setShowBluetoothPairing] = useState(false);
@@ -147,7 +147,7 @@ export function DeviceManager({
   if (showBluetoothPairing) {
     return (
       <div className="fixed inset-0 z-40 flex items-center justify-center p-6 bg-black/20 backdrop-blur-sm animate-fade-in">
-        <Window title="Pair Bluetooth Device" onClose={() => setShowBluetoothPairing(false)} onMinimize={onMinimize} onMaximize={onMaximize} maximized={maximized} width="w-full max-w-md" height="h-auto">
+        <Window title="Pair Bluetooth Device" onClose={() => setShowBluetoothPairing(false)} onMaximize={onMaximize} maximized={maximized} zIndex={zIndex} width="w-full max-w-md" height="h-auto">
           <div className="p-6">
             <p className="text-cloud-gray-deeper dark:text-dark-text mb-4">Searching for devices...</p>
             <Button variant="secondary" className="w-full" onClick={() => setShowBluetoothPairing(false)}>
@@ -162,7 +162,7 @@ export function DeviceManager({
   if (selectedDevice) {
     return (
       <div className="fixed inset-0 z-40 flex items-center justify-center p-6 bg-black/20 backdrop-blur-sm animate-fade-in">
-        <Window title={selectedDevice.name} onClose={() => setSelectedDevice(null)} width="w-full max-w-3xl" height="h-auto">
+        <Window title={selectedDevice.name} onClose={() => setSelectedDevice(null)} zIndex={zIndex} width="w-full max-w-3xl" height="h-auto">
           <div className="p-6 space-y-6">
             <div className="flex items-start gap-6">
               <div className="w-24 h-24 rounded-cloud-xl bg-cloud-blue/20 flex items-center justify-center flex-shrink-0">
@@ -266,7 +266,7 @@ export function DeviceManager({
   
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center p-6 bg-black/20 backdrop-blur-sm animate-fade-in">
-      <Window title="Device Manager" onClose={onClose} onMinimize={onMinimize} onMaximize={onMaximize} maximized={maximized} width="w-full max-w-5xl" height="h-[85vh]">
+      <Window title="Device Manager" onClose={onClose} onMaximize={onMaximize} maximized={maximized} zIndex={zIndex} width="w-full max-w-5xl" height="h-[85vh]">
         <div className="p-6 space-y-6 overflow-auto h-full">
           <div className="flex items-center justify-between mb-6">
             <div>

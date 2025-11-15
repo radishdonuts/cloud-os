@@ -22,6 +22,9 @@ import {
 
 interface CloudDriveProps {
   onClose: () => void;
+  onMaximize?: () => void;
+  maximized?: boolean;
+  zIndex?: number;
 }
 
 interface CloudFile {
@@ -42,7 +45,7 @@ interface ConnectedDevice {
   online: boolean;
 }
 
-export function CloudDrive({ onClose }: CloudDriveProps) {
+export function CloudDrive({ onClose, onMaximize, maximized = false, zIndex = 40 }: CloudDriveProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTab, setSelectedTab] = useState<'files' | 'devices'>('files');
 
@@ -151,6 +154,9 @@ export function CloudDrive({ onClose }: CloudDriveProps) {
       <Window
         title="CloudOS Drive"
         onClose={onClose}
+        onMaximize={onMaximize}
+        maximized={maximized}
+        zIndex={zIndex}
         width="w-full max-w-5xl"
         height="h-[85vh]"
       >

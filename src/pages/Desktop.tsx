@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { CloudDriveIsland } from '../components/desktop/CloudDriveIsland';
 import { Dock } from '../components/desktop/Dock';
 import { SystemTray } from '../components/desktop/SystemTray';
@@ -16,6 +16,7 @@ export interface DesktopProps {
   cloudFileCount?: number;
   cloudSyncStatus?: 'idle' | 'syncing' | 'synced';
   maximizedApp?: string | null;
+  cloudOSDriveIslandEnabled?: boolean;
 }
 export function Desktop({
   currentUser,
@@ -25,7 +26,8 @@ export function Desktop({
   trashCount = 0,
   cloudFileCount = 0,
   cloudSyncStatus = 'idle',
-  maximizedApp = null
+  maximizedApp = null,
+  cloudOSDriveIslandEnabled = true
 }: DesktopProps) {
   // Generate desktop apps based on user data
   const desktopApps = currentUser.desktopApps.map(app => {
@@ -66,33 +68,54 @@ export function Desktop({
       action
     };
   });
+  const clouds = useMemo(() => {
+    const count = 12;
+    const baseOpacityClass = currentUser.wallpaper.image ? 'opacity-5' : 'opacity-10';
+    return Array.from({ length: count }).map(() => ({
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+      duration: `${12 + Math.random() * 8}s`,
+      delay: `${Math.random() * 5}s`,
+      size: 60 + Math.random() * 100,
+      opacityClass: baseOpacityClass,
+    }));
+  }, [currentUser.wallpaper.image]);
+
   return <div className={`w-full min-h-screen ${currentUser.wallpaper.image ? '' : `bg-gradient-to-br ${currentUser.wallpaper.gradient}`} relative overflow-hidden transition-all duration-500`}>
       {/* Background Image */}
       {currentUser.wallpaper.image && (
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: `url('${currentUser.wallpaper.image}')` }}
         />
       )}
-      
-      {/* Animated Background Clouds */}
+
+      {/* Animated Background Clouds (memoized) */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(12)].map((_, i) => <div key={i} className={`absolute ${currentUser.wallpaper.image ? 'opacity-5' : 'opacity-10'}`} style={{
-        left: `${Math.random() * 100}%`,
-        top: `${Math.random() * 100}%`,
-        animation: `float ${12 + Math.random() * 8}s ease-in-out infinite`,
-        animationDelay: `${Math.random() * 5}s`
-      }}>
-            <CloudIcon size={60 + Math.random() * 100} />
-          </div>)}
+        {clouds.map((c, i) => (
+          <div
+            key={i}
+            className={`absolute ${c.opacityClass}`}
+            style={{
+              left: c.left,
+              top: c.top,
+              animation: `float ${c.duration} ease-in-out infinite`,
+              animationDelay: c.delay,
+            }}
+          >
+            <CloudIcon size={c.size} />
+          </div>
+        ))}
       </div>
 
       {/* Cloud Drive Island */}
-      <CloudDriveIsland
-        onOpenManager={() => onAppOpen('cloud-drive')}
-        fileCount={cloudFileCount}
-        syncStatus={cloudSyncStatus}
-      />
+      {cloudOSDriveIslandEnabled && (
+        <CloudDriveIsland
+          onOpenManager={() => onAppOpen('cloud-drive')}
+          fileCount={cloudFileCount}
+          syncStatus={cloudSyncStatus}
+        />
+      )}
 
       {/* Desktop Icons */}
       <div className="relative z-10 p-8 grid grid-cols-8 gap-4 content-start">

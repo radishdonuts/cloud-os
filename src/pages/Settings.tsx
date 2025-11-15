@@ -17,6 +17,27 @@ export interface SettingsProps {
   onAccentColorChange: (color: string) => void;
   selectedWallpaper: number;
   onWallpaperChange: (id: number) => void;
+  cloudOSDriveIslandEnabled: boolean;
+  onCloudOSDriveIslandChange: (value: boolean) => void;
+  wifiEnabled: boolean;
+  onWifiChange: (value: boolean) => void;
+  zIndex?: number;
+  bluetoothEnabled: boolean;
+  onBluetoothChange: (value: boolean) => void;
+  pairedDevices: {
+    name: string;
+    type: string;
+    battery: number;
+    connected: boolean;
+  }[];
+  onPairedDevicesChange: (
+    devices: {
+      name: string;
+      type: string;
+      battery: number;
+      connected: boolean;
+    }[]
+  ) => void;
 }
 export function Settings({
   onClose,
@@ -29,15 +50,22 @@ export function Settings({
   accentColor,
   onAccentColorChange,
   selectedWallpaper,
-  onWallpaperChange
+  onWallpaperChange,
+  cloudOSDriveIslandEnabled,
+  onCloudOSDriveIslandChange,
+  wifiEnabled,
+  onWifiChange,
+  bluetoothEnabled,
+  onBluetoothChange,
+  pairedDevices,
+  onPairedDevicesChange,
+  zIndex = 40
 }: SettingsProps) {
   const [selectedCategory, setSelectedCategory] = useState('display');
   const [notifications, setNotifications] = useState(true);
   const [autoUpdate, setAutoUpdate] = useState(true);
   const [brightness, setBrightness] = useState(75);
   const [volume, setVolume] = useState(60);
-  const [wifi, setWifi] = useState(true);
-  const [bluetooth, setBluetooth] = useState(true);
   const [selectedOutputDevice, setSelectedOutputDevice] = useState('Built-in Speakers');
 
   const [wifiNetworks, setWifiNetworks] = useState([
@@ -45,11 +73,6 @@ export function Settings({
     { name: 'Office WiFi',   signal: 'Good',      secured: true, connected: false },
     { name: 'Guest Network', signal: 'Fair',      secured: false, connected: false },
     { name: 'Neighbor WiFi', signal: 'Weak',      secured: true, connected: false }
-  ]);
-
-  const [pairedDevices, setPairedDevices] = useState([
-    { name: 'PlayStation 5 Controller', type: 'Game Controller', battery: 85, connected: true },
-    { name: 'AirPods Pro',              type: 'Audio',           battery: 72, connected: true }
   ]);
 
   const [availableDevices, setAvailableDevices] = useState([
@@ -70,23 +93,26 @@ export function Settings({
           : { ...n, connected: false }
       )
     );
-    setWifi(true);
+    onWifiChange(true);
   };
 
   const handlePairDevice = (device: { name: string; type: string }) => {
     setAvailableDevices(prev => prev.filter(d => d.name !== device.name));
-    setPairedDevices(prev => [
-      ...prev,
-      { ...device, battery: 100, connected: true }
-    ]);
+    const next = [
+      ...pairedDevices,
+      { ...device, battery: 100, connected: true },
+    ];
+    onPairedDevicesChange(next);
   };
 
   const handleDisconnectDevice = (device: { name: string; type: string; battery: number }) => {
-    setPairedDevices(prev => prev.filter(d => d.name !== device.name));
     setAvailableDevices(prev => [
       ...prev,
-      { name: device.name, type: device.type }
+      { name: device.name, type: device.type },
     ]);
+
+    const next = pairedDevices.filter(d => d.name !== device.name);
+    onPairedDevicesChange(next);
   };
 
   const [textSize, setTextSize] = useState("Medium");
@@ -162,7 +188,7 @@ export function Settings({
     gradient: 'from-purple-300 via-purple-400 to-purple-500'
   }];
   return <div className="fixed inset-0 z-40 flex items-center justify-center p-6 bg-black/20 backdrop-blur-sm animate-fade-in">
-      <Window title="Settings" onClose={onClose} onMaximize={onMaximize} maximized={maximized} width="w-full max-w-6xl" height="h-[85vh]">
+      <Window title="Settings" onClose={onClose} onMaximize={onMaximize} maximized={maximized} zIndex={zIndex} width="w-full max-w-6xl" height="h-[85vh]">
         <div className="flex h-full">
           {/* Sidebar */}
           <div className="w-64 border-r border-cloud-gray/20 dark:border-dark-border p-4 space-y-2 overflow-auto">
@@ -323,17 +349,18 @@ export function Settings({
                         Wi-Fi
                       </p>
                       <p className="text-sm text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
-                        {wifi
+                        {wifiEnabled
                           ? connectedWifi
                             ? `Connected to "${connectedWifi.name}"`
                             : 'Not connected'
                           : 'Disabled'}
                       </p>
+
+                      <Switch checked={wifiEnabled} onChange={onWifiChange} />
                     </div>
-                    <Switch checked={wifi} onChange={setWifi} />
                   </div>
 
-                  {wifi && <div className="space-y-3 pt-4 border-t border-cloud-gray/20 dark:border-dark-border">
+                  {wifiEnabled && <div className="space-y-3 pt-4 border-t border-cloud-gray/20 dark:border-dark-border">
                       <p className="text-sm font-semibold text-cloud-gray-deeper dark:text-dark-text mb-3">
                         Available Networks
                       </p>
@@ -395,15 +422,15 @@ export function Settings({
                       Bluetooth
                     </h3>
                     <p className="text-sm text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
-                      {bluetooth
+                      {bluetoothEnabled
                         ? `${pairedDevices.length} device${pairedDevices.length === 1 ? '' : 's'} connected`
                         : 'Disabled'}
                     </p>
                   </div>
-                  <Switch checked={bluetooth} onChange={setBluetooth} />
+                  <Switch checked={bluetoothEnabled} onChange={onBluetoothChange} />
                 </div>
 
-                {bluetooth && <>
+                {bluetoothEnabled && <>
                     <div className="mb-6">
                       <p className="text-sm font-semibold text-cloud-gray-deeper dark:text-dark-text mb-3">
                         Paired Devices
@@ -484,7 +511,7 @@ export function Settings({
                 <h3 className="text-lg font-semibold text-cloud-gray-deeper dark:text-dark-text mb-4">
                   Storage Overview
                 </h3>
-                <div className="mb-4">
+                <div className="mb-6">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm text-cloud-gray-deeper/80 dark:text-dark-text-muted font-medium">
                       540 GB of 1 TB used
@@ -499,7 +526,7 @@ export function Settings({
                 }} />
                   </div>
                 </div>
-                <Button variant="secondary" className="w-full" onClick={() => {
+                <Button variant="secondary" className="w-full mb-6" onClick={() => {
               if (onOpenStorageManager) {
                 onClose();
                 onOpenStorageManager();
@@ -507,6 +534,22 @@ export function Settings({
             }}>
                   Manage Storage
                 </Button>
+                <div className="border-t border-cloud-gray/20 dark:border-dark-border pt-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="font-semibold text-cloud-gray-deeper dark:text-dark-text mb-1">
+                        CloudOS Drive Island
+                      </p>
+                      <p className="text-sm text-cloud-gray-deeper/70 dark:text-dark-text-muted">
+                        Show CloudOS Drive quick access on desktop
+                      </p>
+                    </div>
+                    <Switch
+                      checked={cloudOSDriveIslandEnabled}
+                      onChange={onCloudOSDriveIslandChange}
+                    />
+                  </div>
+                </div>
               </Card>}
 
             {selectedCategory === 'power' && <Card className="p-6">

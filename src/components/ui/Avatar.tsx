@@ -1,4 +1,3 @@
-import React from 'react';
 import { UserIcon } from 'lucide-react';
 export interface AvatarProps {
   src?: string;

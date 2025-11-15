@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Window } from '../components/layout/Window';
-import { FolderIcon, ImageIcon, SettingsIcon, MonitorIcon, CpuIcon, HardDriveIcon, ShoppingBagIcon, GamepadIcon, PowerIcon, MoonIcon, LogOutIcon, FileTextIcon, SearchIcon, UsersIcon, CloudIcon, CodeIcon, Trash2Icon } from 'lucide-react';
+import { FolderIcon, ImageIcon, SettingsIcon, MonitorIcon, CpuIcon, HardDriveIcon, ShoppingBagIcon, GamepadIcon, PowerIcon, MoonIcon, LogOutIcon, FileTextIcon, SearchIcon, UsersIcon, CloudIcon, CodeIcon, Trash2Icon, Globe, Joystick } from 'lucide-react';
 export interface LauncherProps {
   onClose: () => void;
   onAppOpen: (app: string) => void;
@@ -21,67 +21,102 @@ export function Launcher({
 }: LauncherProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [confirmAction, setConfirmAction] = useState<null | { type: 'sleep' | 'switchUser' | 'logout' | 'shutdown'; title: string; message: string }>(null);
-  const apps = [{
-    id: 'files',
-    name: 'Files',
-    icon: FolderIcon,
-    color: 'from-cloud-blue to-cloud-green'
-  }, {
-    id: 'photos',
-    name: 'Photos',
-    icon: ImageIcon,
-    color: 'from-cloud-pink to-cloud-purple'
-  }, {
-    id: 'notes',
-    name: 'Notes',
-    icon: FileTextIcon,
-    color: 'from-cloud-green to-cloud-blue'
-  }, {
-    id: 'cloud-drive',
-    name: 'Cloud Drive',
-    icon: CloudIcon,
-    color: 'from-cyan-400 to-blue-500'
-  }, {
-    id: 'settings',
-    name: 'Settings',
-    icon: SettingsIcon,
-    color: 'from-cloud-gray-dark to-cloud-gray-deeper'
-  }, {
-    id: 'device-manager',
-    name: 'Devices',
-    icon: MonitorIcon,
-    color: 'from-cloud-blue to-cloud-purple'
-  }, {
-    id: 'process-manager',
-    name: 'Processes',
-    icon: CpuIcon,
-    color: 'from-cloud-green to-cloud-blue'
-  }, {
-    id: 'storage-manager',
-    name: 'Storage',
-    icon: HardDriveIcon,
-    color: 'from-cloud-purple to-cloud-pink'
-  }, {
-    id: 'app-store',
-    name: 'App Store',
-    icon: ShoppingBagIcon,
-    color: 'from-cloud-blue to-cloud-green'
-  }, {
-    id: 'terminal',
-    name: 'Terminal',
-    icon: CodeIcon,
-    color: 'from-cloud-gray-dark to-cloud-gray-deeper'
-  }, {
-    id: 'game-mode',
-    name: 'Gaming',
-    icon: GamepadIcon,
-    color: 'from-cloud-pink to-cloud-purple'
-  }, { 
-    id: 'trash', 
-    name: 'Trash', 
-    icon: Trash2Icon 
-  },];
-  const filteredApps = apps.filter(app => app.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  const apps = [
+    {
+      id: 'files',
+      name: 'Files',
+      icon: <FolderIcon size={22} />,
+      color: 'from-cloud-blue to-cloud-green'
+    },
+    {
+      id: 'photos',
+      name: 'Photos',
+      icon: <ImageIcon size={22} />,
+      color: 'from-cloud-pink to-cloud-purple'
+    },
+    {
+      id: 'notes',
+      name: 'Notes',
+      icon: <FileTextIcon size={22} />,
+      color: 'from-cloud-green to-cloud-blue'
+    },
+    {
+      id: 'calculator',
+      name: 'Calculator',
+      icon: <GamepadIcon size={22} />,
+      color: 'from-cloud-purple to-cloud-pink'
+    },
+    {
+      id: 'cloud-drive',
+      name: 'Cloud Drive',
+      icon: <CloudIcon size={22} />,
+      color: 'from-cyan-400 to-blue-500'
+    },
+    {
+      id: 'settings',
+      name: 'Settings',
+      icon: <SettingsIcon size={22} />,
+      color: 'from-cloud-gray-dark to-cloud-gray-deeper'
+    },
+    {
+      id: 'device-manager',
+      name: 'Devices',
+      icon: <MonitorIcon size={22} />,
+      color: 'from-cloud-blue to-cloud-purple'
+    },
+    {
+      id: 'process-manager',
+      name: 'Processes',
+      icon: <CpuIcon size={22} />,
+      color: 'from-cloud-green to-cloud-blue'
+    },
+    {
+      id: 'storage-manager',
+      name: 'Storage',
+      icon: <HardDriveIcon size={22} />,
+      color: 'from-cloud-purple to-cloud-pink'
+    },
+    {
+      id: 'app-store',
+      name: 'App Store',
+      icon: <ShoppingBagIcon size={22} />,
+      color: 'from-cloud-blue to-cloud-green'
+    },
+    {
+      id: 'terminal',
+      name: 'Terminal',
+      icon: <CodeIcon size={22} />,
+      color: 'from-cloud-gray-dark to-cloud-gray-deeper'
+    },
+    {
+      id: 'game-mode',
+      name: 'Gaming',
+      icon: <GamepadIcon size={22} />,
+      color: 'from-cloud-pink to-cloud-purple'
+    },
+    {
+      id: 'browser',
+      name: 'Browser',
+      icon: <Globe size={22} />,
+      color: 'from-blue-400 to-blue-600'
+    },
+    {
+      id: 'game-library',
+      name: 'Game Library',
+      icon: <Joystick size={22} />,
+      color: 'from-purple-500 to-pink-500'
+    },
+    {
+      id: 'trash',
+      name: 'Trash',
+      icon: <Trash2Icon size={22} />
+    },
+  ];
+  // ...existing code...
+  const filteredApps = apps.filter(app =>
+    app.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    app.id.toLowerCase().includes(searchQuery.toLowerCase())
+  );
   const handleAppClick = (appId: string) => {
     onAppOpen(appId);
     onClose();
@@ -132,10 +167,9 @@ export function Launcher({
             </p>
           </div> : <div className="grid grid-cols-5 gap-6 mb-6">
             {filteredApps.map(app => {
-          const Icon = app.icon;
           return <button key={app.id} onClick={() => handleAppClick(app.id)} className="group flex flex-col items-center gap-3 p-4 rounded-cloud-xl hover:bg-cloud-gray/20 dark:hover:bg-dark-bg-lighter transition-all duration-200">
                   <div className={`w-20 h-20 rounded-cloud-xl bg-gradient-to-br ${app.color} flex items-center justify-center shadow-cloud group-hover:scale-110 transition-transform duration-200`}>
-                    <Icon size={36} className="text-white" />
+                    {app.icon}
                   </div>
                   <span className="text-sm font-medium text-cloud-gray-deeper dark:text-dark-text text-center">
                     {app.name}

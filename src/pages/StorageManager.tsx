@@ -6,15 +6,15 @@ import { ProgressRing } from '../components/ui/ProgressRing';
 import { HardDriveIcon, FolderIcon, ImageIcon, VideoIcon, MusicIcon, FileTextIcon, TrashIcon } from 'lucide-react';
 export interface StorageManagerProps {
   onClose: () => void;
-  onMinimize?: () => void;
   onMaximize?: () => void;
   maximized?: boolean;
+  zIndex?: number;
 }
 export function StorageManager({
   onClose,
-  onMinimize,
   onMaximize,
-  maximized = false
+  maximized = false,
+  zIndex = 40
 }: StorageManagerProps) {
   const [optimizing, setOptimizing] = useState(false);
   const [cacheCleared, setCacheCleared] = useState(false);
@@ -102,7 +102,7 @@ export function StorageManager({
     setLargeFiles(largeFiles.filter(f => f.name !== fileName));
   };
   return <div className="fixed inset-0 z-40 flex items-center justify-center p-6 bg-black/20 backdrop-blur-sm animate-fade-in">
-      <Window title="Storage Manager" onClose={onClose} onMinimize={onMinimize} onMaximize={onMaximize} maximized={maximized} width="w-full max-w-5xl" height="h-[80vh]">
+      <Window title="Storage Manager" onClose={onClose} onMaximize={onMaximize} maximized={maximized} zIndex={zIndex} width="w-full max-w-5xl" height="h-[80vh]">
         <div className="p-6 space-y-6">
           {/* Storage Overview */}
           <div className="grid grid-cols-3 gap-6">

@@ -3,61 +3,75 @@ import { Window } from '../components/layout/Window';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
-import { PlusIcon, TrashIcon, FileTextIcon } from 'lucide-react';
+import { PlusIcon, TrashIcon, FileTextIcon, BoldIcon, ItalicIcon, UnderlineIcon, ListIcon, SaveIcon } from 'lucide-react';
 export interface NotesProps {
   onClose: () => void;
-  initialContent?: string;
-  initialTitle?: string;
-  onMinimize?: () => void;
   onMaximize?: () => void;
   maximized?: boolean;
+  initialContent?: string;
+  initialTitle?: string;
+  zIndex?: number;
 }
 interface Note {
   id: string;
   title: string;
   content: string;
   modified: string;
+  fontSize: number;
+  fontFamily: string;
 }
 export function Notes({
   onClose,
+  onMaximize,
+  maximized = false,
   initialContent = '',
   initialTitle = 'Untitled',
-  onMinimize,
-  onMaximize,
-  maximized = false
+  zIndex = 40
 }: NotesProps) {
   const [notes, setNotes] = useState<Note[]>([{
     id: '1',
     title: 'Meeting Notes',
     content: 'Discuss Q4 goals and project timeline...',
-    modified: 'Today'
+    modified: 'Today',
+    fontSize: 16,
+    fontFamily: 'sans'
   }, {
     id: '2',
     title: 'Shopping List',
     content: 'Milk, Eggs, Bread, Coffee...',
-    modified: 'Yesterday'
+    modified: 'Yesterday',
+    fontSize: 16,
+    fontFamily: 'sans'
   }, {
     id: '3',
     title: 'Ideas',
     content: 'New app features to implement...',
-    modified: 'Last week'
+    modified: 'Last week',
+    fontSize: 16,
+    fontFamily: 'sans'
   }]);
   const [selectedNote, setSelectedNote] = useState<Note | null>(initialContent ? {
     id: 'temp',
     title: initialTitle,
     content: initialContent,
-    modified: 'Just now'
+    modified: 'Just now',
+    fontSize: 16,
+    fontFamily: 'sans'
   } : notes[0]);
   const [editingTitle, setEditingTitle] = useState(false);
+  const [isSaved, setIsSaved] = useState(true);
   const handleCreateNote = () => {
     const newNote: Note = {
       id: Date.now().toString(),
       title: 'Untitled',
       content: '',
-      modified: 'Just now'
+      modified: 'Just now',
+      fontSize: 16,
+      fontFamily: 'sans'
     };
     setNotes([newNote, ...notes]);
     setSelectedNote(newNote);
+    setIsSaved(true);
   };
   const handleDeleteNote = (noteId: string) => {
     setNotes(notes.filter(n => n.id !== noteId));
@@ -74,6 +88,7 @@ export function Notes({
     };
     setSelectedNote(updatedNote);
     setNotes(notes.map(n => n.id === selectedNote.id ? updatedNote : n));
+    setIsSaved(false);
   };
   const handleTitleChange = (title: string) => {
     if (!selectedNote) return;
@@ -84,8 +99,38 @@ export function Notes({
     setSelectedNote(updatedNote);
     setNotes(notes.map(n => n.id === selectedNote.id ? updatedNote : n));
   };
+  const handleFontSizeChange = (size: number) => {
+    if (!selectedNote) return;
+    const updatedNote = {
+      ...selectedNote,
+      fontSize: size
+    };
+    setSelectedNote(updatedNote);
+    setNotes(notes.map(n => n.id === selectedNote.id ? updatedNote : n));
+  };
+  const handleFontFamilyChange = (family: string) => {
+    if (!selectedNote) return;
+    const updatedNote = {
+      ...selectedNote,
+      fontFamily: family
+    };
+    setSelectedNote(updatedNote);
+    setNotes(notes.map(n => n.id === selectedNote.id ? updatedNote : n));
+  };
+  const handleSave = () => {
+    if (selectedNote) {
+      const updatedNote = {
+        ...selectedNote,
+        modified: 'Just now'
+      };
+      setSelectedNote(updatedNote);
+      setNotes(notes.map(n => n.id === selectedNote.id ? updatedNote : n));
+      setIsSaved(true);
+      // Simulate saving only (no download)
+    }
+  };
   return <div className="fixed inset-0 z-40 flex items-center justify-center p-6 bg-black/20 backdrop-blur-sm animate-fade-in">
-      <Window title="Notes" onClose={onClose} onMinimize={onMinimize} onMaximize={onMaximize} maximized={maximized} width="w-full max-w-6xl" height="h-[85vh]">
+      <Window title="Notes" onClose={onClose} onMaximize={onMaximize} maximized={maximized} zIndex={zIndex} width="w-full max-w-6xl" height="h-[85vh]">
         <div className="flex h-full">
           {/* Sidebar */}
           <div className="w-64 border-r border-cloud-gray/20 dark:border-dark-border p-4 flex flex-col">
@@ -122,17 +167,74 @@ export function Notes({
                     </h2>}
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-cloud-gray-dark dark:text-dark-text-muted">
-                      {selectedNote.modified}
+                      {selectedNote.modified} {!isSaved && '*'}
                     </span>
+                    <Button variant="primary" size="sm" onClick={handleSave} className="flex items-center gap-2">
+                      <SaveIcon size={16} />
+                      Save
+                    </Button>
                     <Button variant="ghost" size="sm" onClick={() => handleDeleteNote(selectedNote.id)}>
                       <TrashIcon size={18} />
                     </Button>
                   </div>
                 </div>
 
+                {/* Formatting Toolbar */}
+                <div className="px-6 py-3 border-b border-cloud-gray/20 dark:border-dark-border flex items-center gap-4 flex-wrap bg-cloud-gray/5 dark:bg-dark-bg-lighter/30">
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm font-medium text-cloud-gray-deeper dark:text-dark-text">
+                      Font:
+                    </label>
+                    <select
+                      value={selectedNote.fontFamily}
+                      onChange={e => handleFontFamilyChange(e.target.value)}
+                      className="px-3 py-1 rounded-cloud bg-white/50 dark:bg-dark-bg-light/50 border border-cloud-gray/20 dark:border-dark-border text-sm text-cloud-gray-deeper dark:text-dark-text"
+                    >
+                      <option value="sans">Sans Serif</option>
+                      <option value="serif">Serif</option>
+                      <option value="mono">Monospace</option>
+                    </select>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm font-medium text-cloud-gray-deeper dark:text-dark-text">
+                      Size:
+                    </label>
+                    <input
+                      type="number"
+                      min="8"
+                      max="72"
+                      value={selectedNote.fontSize}
+                      onChange={e => handleFontSizeChange(parseInt(e.target.value))}
+                      className="w-16 px-2 py-1 rounded-cloud bg-white/50 dark:bg-dark-bg-light/50 border border-cloud-gray/20 dark:border-dark-border text-sm text-cloud-gray-deeper dark:text-dark-text"
+                    />
+                    <span className="text-xs text-cloud-gray-dark dark:text-dark-text-muted">px</span>
+                  </div>
+
+                  <div className="flex-1" />
+
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-cloud-gray-dark dark:text-dark-text-muted">
+                      Words: {selectedNote.content.split(/\s+/).filter(w => w).length}
+                    </span>
+                    <span className="text-xs text-cloud-gray-dark dark:text-dark-text-muted">
+                      Characters: {selectedNote.content.length}
+                    </span>
+                  </div>
+                </div>
+
                 {/* Content */}
-                <div className="flex-1 p-6">
-                  <textarea value={selectedNote.content} onChange={e => handleContentChange(e.target.value)} placeholder="Start typing..." className="w-full h-full bg-transparent border-none outline-none resize-none text-cloud-gray-deeper dark:text-dark-text text-lg leading-relaxed" />
+                <div className="flex-1 p-6 overflow-auto">
+                  <textarea
+                    value={selectedNote.content}
+                    onChange={e => handleContentChange(e.target.value)}
+                    placeholder="Start typing..."
+                    className="w-full h-full bg-transparent border-none outline-none resize-none text-cloud-gray-deeper dark:text-dark-text leading-relaxed"
+                    style={{
+                      fontSize: `${selectedNote.fontSize}px`,
+                      fontFamily: selectedNote.fontFamily === 'serif' ? 'Georgia, serif' : selectedNote.fontFamily === 'mono' ? 'Menlo, monospace' : 'system-ui, sans-serif'
+                    }}
+                  />
                 </div>
               </> : <div className="flex-1 flex items-center justify-center">
                 <div className="text-center">

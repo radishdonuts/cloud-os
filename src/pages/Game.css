@@ -1,0 +1,17 @@
+@font-face {
+  font-family: 'zhcn';
+  src: url('/fonts/zhcn.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.game-title {
+  font-family: 'zhcn', sans-serif;
+  letter-spacing: 0.05em;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.game-subtitle {
+  font-family: 'zhcn', sans-serif;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}

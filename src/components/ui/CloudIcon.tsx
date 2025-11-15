@@ -1,4 +1,3 @@
-import React from 'react';
 export interface CloudIconProps {
   size?: number;
   className?: string;

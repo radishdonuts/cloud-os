@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Window } from '../components/layout/Window';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -6,15 +6,15 @@ import { Input } from '../components/ui/Input';
 import { SearchIcon, StarIcon, DownloadIcon } from 'lucide-react';
 export interface AppStoreProps {
   onClose: () => void;
-  onMinimize?: () => void;
   onMaximize?: () => void;
   maximized?: boolean;
+  zIndex?: number;
 }
 export function AppStore({
   onClose,
-  onMinimize,
   onMaximize,
-  maximized = false
+  maximized = false,
+  zIndex = 40
 }: AppStoreProps) {
   const [selectedCategory, setSelectedCategory] = useState('featured');
   const [searchQuery, setSearchQuery] = useState('');
@@ -215,7 +215,7 @@ export function AppStore({
     return p.replace('$', '₱');
   };
   return <div className="fixed inset-0 z-40 flex items-center justify-center p-6 bg-black/20 backdrop-blur-sm animate-fade-in">
-      <Window title="App Store" onClose={onClose} onMinimize={onMinimize} onMaximize={onMaximize} maximized={maximized} width="w-full max-w-6xl" height="h-[85vh]">
+      <Window title="Cumula: Cumulate Apps" onClose={onClose} onMaximize={onMaximize} maximized={maximized} zIndex={zIndex} width="w-full max-w-6xl" height="h-[85vh]">
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="px-6 py-4 border-b border-cloud-gray/20 dark:border-dark-border">

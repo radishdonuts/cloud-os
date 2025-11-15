@@ -5,9 +5,9 @@ import { Button } from '../components/ui/Button';
 import { CpuIcon, MemoryStickIcon, HardDriveIcon, WifiIcon, XIcon, PauseIcon, PlayIcon } from 'lucide-react';
 export interface ProcessManagerProps {
   onClose: () => void;
-  onMinimize?: () => void;
   onMaximize?: () => void;
   maximized?: boolean;
+  zIndex?: number;
 }
 interface Process {
   id: string;
@@ -19,9 +19,9 @@ interface Process {
 }
 export function ProcessManager({
   onClose,
-  onMinimize,
   onMaximize,
-  maximized = false
+  maximized = false,
+  zIndex = 40
 }: ProcessManagerProps) {
   const [processes, setProcesses] = useState<Process[]>([{
     id: '1',
@@ -99,7 +99,7 @@ export function ProcessManager({
   const totalCpu = processes.reduce((sum, p) => sum + p.cpu, 0);
   const totalMemory = processes.reduce((sum, p) => sum + p.memory, 0);
   return <div className="fixed inset-0 z-40 flex items-center justify-center p-6 bg-black/20 backdrop-blur-sm animate-fade-in">
-      <Window title="Process Manager" onClose={onClose} onMinimize={onMinimize} onMaximize={onMaximize} maximized={maximized} width="w-full max-w-5xl" height="h-[80vh]">
+      <Window title="Process Manager" onClose={onClose} onMaximize={onMaximize} maximized={maximized} zIndex={zIndex} width="w-full max-w-5xl" height="h-[80vh]">
         <div className="p-6 space-y-6">
           {/* Resource Overview */}
           <div className="grid grid-cols-4 gap-4">

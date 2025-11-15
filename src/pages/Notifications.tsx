@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Notification } from '../components/desktop/Notification';
 import { Button } from '../components/ui/Button';
 import { XIcon } from 'lucide-react';

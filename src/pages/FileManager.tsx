@@ -7,7 +7,6 @@ import { Trash } from './Trash';
 import { FolderIcon, FileTextIcon, ImageIcon, VideoIcon, MusicIcon, HomeIcon, DownloadIcon, CloudIcon, UsbIcon, ChevronRightIcon, Grid3x3Icon, ListIcon, SearchIcon, ChevronLeftIcon, TrashIcon, Edit2Icon, FolderPlusIcon, FilePlusIcon, CheckSquare, Square, Trash2Icon } from 'lucide-react';
 export interface FileManagerProps {
   onClose: () => void;
-  onMinimize?: () => void;
   onMaximize?: () => void;
   maximized?: boolean;
   initialCategory?: Category;
@@ -16,6 +15,7 @@ export interface FileManagerProps {
   onOpenNote?: (content: string, title: string) => void;
   onOpenPDF?: (fileName: string) => void;
   onOpenDocument?: (fileName: string) => void;
+  zIndex?: number;
 }
 
 // Export top-level roots so other components (Terminal) can reference available directories
@@ -41,7 +41,6 @@ interface ContextMenu {
 
 export function FileManager({
   onClose,
-  onMinimize,
   onMaximize,
   maximized = false,
   initialCategory = 'home',
@@ -49,7 +48,8 @@ export function FileManager({
   onOpenPhoto,
   onOpenNote,
   onOpenPDF,
-  onOpenDocument
+  onOpenDocument,
+  zIndex = 40
 }: FileManagerProps) {
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [selectedCategory, setSelectedCategory] = useState<Category>(initialCategory);
@@ -617,7 +617,10 @@ export function FileManager({
   if (showTrashPage) {
     return (
       <Trash
-        onClose={() => setShowTrashPage(false)}
+        onClose={() => {
+          setShowTrashPage(false);
+          onClose?.();
+        }}
         onMaximize={onMaximize}
         maximized={maximized}
         initialItems={(files.trash[''] || []).map((item, idx) => ({
@@ -631,7 +634,7 @@ export function FileManager({
 
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center p-6 bg-black/20 backdrop-blur-sm animate-fade-in" onClick={() => setContextMenu(null)}>
-      <Window title="Files" onClose={onClose} onMinimize={onMinimize} onMaximize={onMaximize} maximized={maximized} width="w-full max-w-6xl" height="h-[80vh]">
+      <Window title="Files" onClose={onClose} onMaximize={onMaximize} maximized={maximized} width="w-full max-w-6xl" height="h-[80vh]" zIndex={zIndex}>
         <div className="flex h-full">
           {/* Sidebar */}
           <div className="w-64 border-r border-cloud-gray/20 dark:border-dark-border p-4 space-y-2">
