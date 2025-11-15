@@ -26,10 +26,12 @@ import { Trash } from './pages/Trash';
 import { GameLibrary } from './pages/GameLibrary';
 import { Browser } from './pages/Browser';
 import { Game } from './pages/Game';
+import { MusicPlayer } from './pages/MusicPlayer';
+import { VideoPlayer } from './pages/VideoPlayer';
 
 type Screen = 'bios' | 'boot' | 'login' | 'account-creation' | 'desktop';
 type App = 'files' | 'photos' | 'notes' | 'pdf-viewer' | 'document-viewer' | 'device-manager' | 'process-manager' | 'memory-manager' | 'storage-manager' | 'settings' | 
-'app-store' | 'game-mode' | 'cloud-drive' | 'terminal' | 'calculator' | 'trash' | 'game-library' | 'browser' | 'game' | null;
+'app-store' | 'game-mode' | 'cloud-drive' | 'terminal' | 'calculator' | 'trash' | 'game-library' | 'browser' | 'game' | 'music-player' | 'video-player' | null;
 export interface User {
   id: string;
   name: string;
@@ -136,6 +138,7 @@ export function App() {
   const [noteTitle, setNoteTitle] = useState('Untitled');
   const [pdfFileName, setPdfFileName] = useState('');
   const [documentFileName, setDocumentFileName] = useState('');
+  const [videoFileName, setVideoFileName] = useState('');
   const [trashCount] = useState(0);
   
   // Cloud Drive state
@@ -197,6 +200,8 @@ export function App() {
     else if (appId === 'game-library') appToOpen = 'game-library';
     else if (appId === 'browser') appToOpen = 'browser';
     else if (appId === 'game') appToOpen = 'game';
+    else if (appId === 'music-player') appToOpen = 'music-player';
+    else if (appId === 'video-player') appToOpen = 'video-player';
 
     if (appToOpen) {
       setOpenApps(prev => prev.includes(appToOpen) ? prev : [...prev, appToOpen]);
@@ -218,6 +223,13 @@ export function App() {
   const handleOpenDocument = (fileName: string) => {
     setDocumentFileName(fileName);
     setOpenApps(prev => prev.includes('document-viewer') ? prev : [...prev, 'document-viewer']);
+  };
+  const handleOpenMusic = (fileName: string) => {
+    setOpenApps(prev => prev.includes('music-player') ? prev : [...prev, 'music-player']);
+  };
+  const handleOpenVideo = (fileName: string) => {
+    setVideoFileName(fileName);
+    setOpenApps(prev => prev.includes('video-player') ? prev : [...prev, 'video-player']);
   };
   const handleLogout = () => {
     setCurrentUser(null);
@@ -312,6 +324,8 @@ export function App() {
           onOpenNote={handleOpenNote} 
           onOpenPDF={handleOpenPDF} 
           onOpenDocument={handleOpenDocument}
+          onOpenMusic={handleOpenMusic}
+          onOpenVideo={handleOpenVideo}
           onMaximize={() => handleMaximize('files')}
           maximized={maximizedApp === 'files'}
           zIndex={getZIndex('files')}
@@ -467,6 +481,23 @@ export function App() {
             onMaximize={() => handleMaximize('game')}
             maximized={maximizedApp === 'game'}
             zIndex={getZIndex('game')}
+          />
+        )}
+        {openApps.includes('music-player') && (
+          <MusicPlayer
+            onClose={() => handleCloseApp('music-player')}
+            onMaximize={() => handleMaximize('music-player')}
+            maximized={maximizedApp === 'music-player'}
+            zIndex={getZIndex('music-player')}
+          />
+        )}
+        {openApps.includes('video-player') && (
+          <VideoPlayer
+            videoFileName={videoFileName}
+            onClose={() => handleCloseApp('video-player')}
+            onMaximize={() => handleMaximize('video-player')}
+            maximized={maximizedApp === 'video-player'}
+            zIndex={getZIndex('video-player')}
           />
         )}
       </>}

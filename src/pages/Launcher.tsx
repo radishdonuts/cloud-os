@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Window } from '../components/layout/Window';
-import { FolderIcon, ImageIcon, SettingsIcon, MonitorIcon, CpuIcon, HardDriveIcon, ShoppingBagIcon, GamepadIcon, PowerIcon, MoonIcon, LogOutIcon, FileTextIcon, SearchIcon, UsersIcon, CloudIcon, CodeIcon, Trash2Icon, Globe, Joystick } from 'lucide-react';
+import { FolderIcon, ImageIcon, SettingsIcon, MonitorIcon, CpuIcon, HardDriveIcon, ShoppingBagIcon, GamepadIcon, PowerIcon, MoonIcon, LogOutIcon, FileTextIcon, SearchIcon, UsersIcon, CloudIcon, CodeIcon, Trash2Icon, Globe, Joystick, MusicIcon } from 'lucide-react';
 export interface LauncherProps {
   onClose: () => void;
   onAppOpen: (app: string) => void;
@@ -39,6 +39,12 @@ export function Launcher({
       name: 'Notes',
       icon: <FileTextIcon size={22} />,
       color: 'from-cloud-green to-cloud-blue'
+    },
+    {
+      id: 'music-player',
+      name: 'Music',
+      icon: <MusicIcon size={22} />,
+      color: 'from-purple-500 to-pink-500'
     },
     {
       id: 'calculator',

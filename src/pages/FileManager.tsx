@@ -15,6 +15,8 @@ export interface FileManagerProps {
   onOpenNote?: (content: string, title: string) => void;
   onOpenPDF?: (fileName: string) => void;
   onOpenDocument?: (fileName: string) => void;
+  onOpenMusic?: (fileName: string) => void;
+  onOpenVideo?: (fileName: string) => void;
   zIndex?: number;
 }
 
@@ -49,6 +51,8 @@ export function FileManager({
   onOpenNote,
   onOpenPDF,
   onOpenDocument,
+  onOpenMusic,
+  onOpenVideo,
   zIndex = 40
 }: FileManagerProps) {
   const [view, setView] = useState<'grid' | 'list'>('grid');
@@ -128,6 +132,12 @@ export function FileManager({
         size: '2.1 MB',
         modified: 'Yesterday',
         synced: false
+      }, {
+        name: 'Raiden.mp4',
+        type: 'video',
+        size: '45 MB',
+        modified: 'Today',
+        synced: true
       }]
     },
     documents: {
@@ -279,7 +289,7 @@ export function FileManager({
         modified: 'Yesterday',
         synced: false
       }, {
-        name: 'Song.mp3',
+        name: 'Genshin Impact Main Theme.mp3',
         type: 'music',
         size: '8.2 MB',
         modified: '2 days ago',
@@ -437,6 +447,10 @@ export function FileManager({
       onOpenPDF(file.name);
     } else if (file.type === 'doc' && onOpenDocument) {
       onOpenDocument(file.name);
+    } else if (file.type === 'music' && onOpenMusic) {
+      onOpenMusic(file.name);
+    } else if (file.type === 'video' && onOpenVideo) {
+      onOpenVideo(file.name);
     }
   };
 
