@@ -3,16 +3,16 @@ export interface SystemTrayProps {
   onQuickSettingsClick: () => void;
   onNotificationsClick: () => void;
   notificationCount?: number;
-  maximizedApp?: string | null;
+  hasOpenWindows?: boolean;
 }
 export function SystemTray({
   onQuickSettingsClick,
   onNotificationsClick,
   notificationCount = 0,
-  maximizedApp = null
+  hasOpenWindows = false
 }: SystemTrayProps) {
-  // Hide tray if any app is maximized
-  return maximizedApp ? (
+  // Collapse to compact form when windows are open
+  return hasOpenWindows ? (
     <div
       className="fixed top-1/2 right-2 z-50 transform -translate-y-1/2 transition-all duration-300 group opacity-30 hover:opacity-100"
       style={{ pointerEvents: 'auto' }}

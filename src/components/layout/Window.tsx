@@ -22,7 +22,7 @@ export function Window({
   return <div className={`
       ${maximized ? `fixed inset-0 w-screen h-screen` : `absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ${width} ${height}`}
       bg-white/90 dark:bg-dark-bg/90
-      backdrop-blur-sm
+      backdrop-blur-cloud
       rounded-cloud-xl
       shadow-cloud-lg
       border border-cloud-gray/20 dark:border-dark-border

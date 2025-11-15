@@ -30,6 +30,8 @@ import { User, defaultNote } from './Interfaces';
 import { firebase } from './firebase';
 import { MusicPlayer } from './pages/MusicPlayer';
 import { VideoPlayer } from './pages/VideoPlayer';
+import { SystemTray } from './components/desktop/SystemTray';
+import { Dock } from './components/desktop/Dock';
 
 type Screen = 'bios' | 'boot' | 'login' | 'account-creation' | 'desktop';
 type App = 'files' | 'photos' | 'notes' | 'pdf-viewer' | 'document-viewer' | 'device-manager' | 'process-manager' | 'memory-manager' | 'storage-manager' | 'settings' | 
@@ -96,12 +98,24 @@ export function App() {
     // Handle special file manager routes
     if (appId === 'files-documents') {
       setFileManagerCategory('documents');
-      setOpenApps(prev => prev.includes('files') ? prev : [...prev, 'files']);
+      setOpenApps(prev => {
+        if (prev.includes('files')) {
+          return [...prev.filter(a => a !== 'files'), 'files'] as App[];
+        }
+        const newApps = [...prev, 'files'] as App[];
+        return newApps.length > 3 ? (newApps.slice(1) as App[]) : newApps;
+      });
       return;
     }
     if (appId === 'files-desktop') {
       setFileManagerCategory('desktop');
-      setOpenApps(prev => prev.includes('files') ? prev : [...prev, 'files']);
+      setOpenApps(prev => {
+        if (prev.includes('files')) {
+          return [...prev.filter(a => a !== 'files'), 'files'] as App[];
+        }
+        const newApps = [...prev, 'files'] as App[];
+        return newApps.length > 3 ? (newApps.slice(1) as App[]) : newApps;
+      });
       return;
     }
     // Add app to open apps if not already open
@@ -126,32 +140,80 @@ export function App() {
     else if (appId === 'video-player') appToOpen = 'video-player';
 
     if (appToOpen) {
-      setOpenApps(prev => prev.includes(appToOpen) ? prev : [...prev, appToOpen]);
+      setOpenApps(prev => {
+        // If app is already open, move it to the end (bring to focus/top)
+        if (prev.includes(appToOpen)) {
+          return [...prev.filter(a => a !== appToOpen), appToOpen] as App[];
+        }
+        // Otherwise add it to the end, but limit to 3 windows max
+        const newApps = [...prev, appToOpen] as App[];
+        if (newApps.length > 3) {
+          // Remove the oldest (first) window
+          return newApps.slice(1) as App[];
+        }
+        return newApps;
+      });
     }
   };
   const handleOpenPhoto = (folder: string) => {
     setPhotoFolder(folder);
-    setOpenApps(prev => prev.includes('photos') ? prev : [...prev, 'photos']);
+    setOpenApps(prev => {
+      if (prev.includes('photos')) {
+        return [...prev.filter(a => a !== 'photos'), 'photos'] as App[];
+      }
+      const newApps = [...prev, 'photos'] as App[];
+      return newApps.length > 3 ? (newApps.slice(1) as App[]) : newApps;
+    });
   };
   const handleOpenNote = (content: string, title: string) => {
     setNoteContent(content);
     setNoteTitle(title);
-    setOpenApps(prev => prev.includes('notes') ? prev : [...prev, 'notes']);
+    setOpenApps(prev => {
+      if (prev.includes('notes')) {
+        return [...prev.filter(a => a !== 'notes'), 'notes'] as App[];
+      }
+      const newApps = [...prev, 'notes'] as App[];
+      return newApps.length > 3 ? (newApps.slice(1) as App[]) : newApps;
+    });
   };
   const handleOpenPDF = (fileName: string) => {
     setPdfFileName(fileName);
-    setOpenApps(prev => prev.includes('pdf-viewer') ? prev : [...prev, 'pdf-viewer']);
+    setOpenApps(prev => {
+      if (prev.includes('pdf-viewer')) {
+        return [...prev.filter(a => a !== 'pdf-viewer'), 'pdf-viewer'] as App[];
+      }
+      const newApps = [...prev, 'pdf-viewer'] as App[];
+      return newApps.length > 3 ? (newApps.slice(1) as App[]) : newApps;
+    });
   };
   const handleOpenDocument = (fileName: string) => {
     setDocumentFileName(fileName);
-    setOpenApps(prev => prev.includes('document-viewer') ? prev : [...prev, 'document-viewer']);
+    setOpenApps(prev => {
+      if (prev.includes('document-viewer')) {
+        return [...prev.filter(a => a !== 'document-viewer'), 'document-viewer'] as App[];
+      }
+      const newApps = [...prev, 'document-viewer'] as App[];
+      return newApps.length > 3 ? (newApps.slice(1) as App[]) : newApps;
+    });
   };
   const handleOpenMusic = (fileName: string) => {
-    setOpenApps(prev => prev.includes('music-player') ? prev : [...prev, 'music-player']);
+    setOpenApps(prev => {
+      if (prev.includes('music-player')) {
+        return [...prev.filter(a => a !== 'music-player'), 'music-player'] as App[];
+      }
+      const newApps = [...prev, 'music-player'] as App[];
+      return newApps.length > 3 ? (newApps.slice(1) as App[]) : newApps;
+    });
   };
   const handleOpenVideo = (fileName: string) => {
     setVideoFileName(fileName);
-    setOpenApps(prev => prev.includes('video-player') ? prev : [...prev, 'video-player']);
+    setOpenApps(prev => {
+      if (prev.includes('video-player')) {
+        return [...prev.filter(a => a !== 'video-player'), 'video-player'] as App[];
+      }
+      const newApps = [...prev, 'video-player'] as App[];
+      return newApps.length > 3 ? (newApps.slice(1) as App[]) : newApps;
+    });
   };
   const handleLogout = () => {
     setCurrentUser(null);
@@ -183,6 +245,269 @@ export function App() {
     return index === -1 ? 0 : 40 + index;
   };
 
+  // Helper to render each window based on app type
+  const renderWindow = (app: App) => {
+    switch(app) {
+      case 'files':
+        return (
+          <FileManager 
+            key="files"
+            onClose={() => { handleCloseApp('files'); setFileManagerCategory('home'); }} 
+            initialCategory={fileManagerCategory} 
+            onOpenPhoto={handleOpenPhoto} 
+            onOpenNote={handleOpenNote} 
+            onOpenPDF={handleOpenPDF} 
+            onOpenDocument={handleOpenDocument}
+            onOpenMusic={handleOpenMusic}
+            onOpenVideo={handleOpenVideo}
+            onMaximize={() => handleMaximize('files')}
+            maximized={maximizedApp === 'files'}
+            zIndex={getZIndex('files')}
+          />
+        );
+      case 'photos':
+        return (
+          <Photos 
+            key="photos"
+            onClose={() => handleCloseApp('photos')} 
+            initialFolder={photoFolder}
+            onMaximize={() => handleMaximize('photos')}
+            maximized={maximizedApp === 'photos'}
+            zIndex={getZIndex('photos')}
+          />
+        );
+      case 'notes':
+        return (
+          <Notes 
+            key="notes"
+            onClose={() => handleCloseApp('notes')} 
+            initialContent={noteContent} 
+            initialTitle={noteTitle}
+            onMaximize={() => handleMaximize('notes')}
+            maximized={maximizedApp === 'notes'}
+            zIndex={getZIndex('notes')}
+          />
+        );
+      case 'calculator':
+        return (
+          <Calculator 
+            key="calculator"
+            onClose={() => handleCloseApp('calculator')} 
+            onMaximize={() => handleMaximize('calculator')}
+            maximized={maximizedApp === 'calculator'}
+            zIndex={getZIndex('calculator')}
+          />
+        );
+      case 'pdf-viewer':
+        return (
+          <PDFViewer 
+            key="pdf-viewer"
+            onClose={() => handleCloseApp('pdf-viewer')} 
+            fileName={pdfFileName}
+            onMaximize={() => handleMaximize('pdf-viewer')}
+            maximized={maximizedApp === 'pdf-viewer'}
+            zIndex={getZIndex('pdf-viewer')}
+          />
+        );
+      case 'document-viewer':
+        return (
+          <DocumentViewer 
+            key="document-viewer"
+            onClose={() => handleCloseApp('document-viewer')} 
+            fileName={documentFileName}
+            onMaximize={() => handleMaximize('document-viewer')}
+            maximized={maximizedApp === 'document-viewer'}
+            zIndex={getZIndex('document-viewer')}
+          />
+        );
+      case 'device-manager':
+        return (
+          <DeviceManager 
+            key="device-manager"
+            onClose={() => handleCloseApp('device-manager')} 
+            onMaximize={() => handleMaximize('device-manager')}
+            maximized={maximizedApp === 'device-manager'}
+            zIndex={getZIndex('device-manager')}
+          />
+        );
+      case 'process-manager':
+        return (
+          <ProcessManager 
+            key="process-manager"
+            onClose={() => handleCloseApp('process-manager')} 
+            onMaximize={() => handleMaximize('process-manager')}
+            maximized={maximizedApp === 'process-manager'}
+            zIndex={getZIndex('process-manager')}
+          />
+        );
+      case 'memory-manager':
+        return (
+          <MemoryManager 
+            key="memory-manager"
+            onClose={() => handleCloseApp('memory-manager')} 
+            onMaximize={() => handleMaximize('memory-manager')}
+            maximized={maximizedApp === 'memory-manager'}
+            zIndex={getZIndex('memory-manager')}
+          />
+        );
+      case 'storage-manager':
+        return (
+          <StorageManager 
+            key="storage-manager"
+            onClose={() => handleCloseApp('storage-manager')} 
+            onMaximize={() => handleMaximize('storage-manager')}
+            maximized={maximizedApp === 'storage-manager'}
+            zIndex={getZIndex('storage-manager')}
+          />
+        );
+      case 'settings':
+        return (
+          <Settings 
+            key="settings"
+            onClose={() => handleCloseApp('settings')} 
+            onOpenStorageManager={() => setOpenApps(prev => prev.includes('storage-manager') ? prev : [...prev, 'storage-manager'])} 
+            onOpenTerminal={() => setOpenApps(prev => prev.includes('terminal') ? prev : [...prev, 'terminal'])}
+            darkMode={darkMode}
+            onDarkModeChange={setDarkMode}
+            accentColor={accentColor}
+            onAccentColorChange={setAccentColor}
+            selectedWallpaper={selectedWallpaper}
+            onWallpaperChange={handleWallpaperChange}
+            onMaximize={() => handleMaximize('settings')}
+            maximized={maximizedApp === 'settings'}
+            cloudOSDriveIslandEnabled={cloudOSDriveIslandEnabled}
+            onCloudOSDriveIslandChange={setCloudOSDriveIslandEnabled}
+            wifiEnabled={wifiEnabled}
+            onWifiChange={setWifiEnabled}
+            zIndex={getZIndex('settings')}
+            bluetoothEnabled={bluetoothEnabled}
+            onBluetoothChange={setBluetoothEnabled}
+            pairedDevices={pairedDevices}
+            onPairedDevicesChange={setPairedDevices}
+          />
+        );
+      case 'terminal':
+        return (
+          <Terminal 
+            key="terminal"
+            onClose={() => handleCloseApp('terminal')} 
+            onMaximize={() => handleMaximize('terminal')}
+            maximized={maximizedApp === 'terminal'}
+            zIndex={getZIndex('terminal')}
+          />
+        );
+      case 'app-store':
+        return (
+          <AppStore 
+            key="app-store"
+            onClose={() => handleCloseApp('app-store')} 
+            onMaximize={() => handleMaximize('app-store')}
+            maximized={maximizedApp === 'app-store'}
+            zIndex={getZIndex('app-store')}
+          />
+        );
+      case 'game-mode':
+        return (
+          <GameMode 
+            key="game-mode"
+            onClose={() => handleCloseApp('game-mode')} 
+            onMaximize={() => handleMaximize('game-mode')}
+            maximized={maximizedApp === 'game-mode'}
+            zIndex={getZIndex('game-mode')}
+            bluetoothEnabled={bluetoothEnabled}
+            controllers={pairedDevices}
+            onToggleController={(name) => {
+              setPairedDevices(prev =>
+                prev.map(d =>
+                  d.name === name
+                    ? { ...d, connected: !d.connected }
+                    : d
+                )
+              );
+            }}
+          />
+        );
+      case 'cloud-drive':
+        return (
+          <CloudDrive 
+            key="cloud-drive"
+            onClose={() => handleCloseApp('cloud-drive')}
+            zIndex={getZIndex('cloud-drive')}
+          />
+        );
+      case 'trash':
+        return (
+          <Trash
+            key="trash"
+            onClose={() => handleCloseApp('trash')}
+            onMaximize={() => handleMaximize('trash')}
+            maximized={maximizedApp === 'trash'}
+            zIndex={getZIndex('trash')}
+          />
+        );
+      case 'game-library':
+        return (
+          <GameLibrary
+            key="game-library"
+            onClose={() => handleCloseApp('game-library')}
+            onMaximize={() => handleMaximize('game-library')}
+            maximized={maximizedApp === 'game-library'}
+            onPlayGame={(gameName) => {
+              setSelectedGameTitle(gameName);
+              setOpenApps(prev => prev.includes('game') ? prev : [...prev, 'game']);
+              setMaximizedApp('game');
+            }}
+            zIndex={getZIndex('game-library')}
+          />
+        );
+      case 'browser':
+        return (
+          <Browser
+            key="browser"
+            wifiEnabled={wifiEnabled}
+            onClose={() => handleCloseApp('browser')}
+            onMaximize={() => handleMaximize('browser')}
+            maximized={maximizedApp === 'browser'}
+            zIndex={getZIndex('browser')}
+          />
+        );
+      case 'game':
+        return (
+          <Game
+            key="game"
+            gameTitle={selectedGameTitle}
+            onClose={() => handleCloseApp('game')}
+            onMaximize={() => handleMaximize('game')}
+            maximized={maximizedApp === 'game'}
+            zIndex={getZIndex('game')}
+          />
+        );
+      case 'music-player':
+        return (
+          <MusicPlayer
+            key="music-player"
+            onClose={() => handleCloseApp('music-player')}
+            onMaximize={() => handleMaximize('music-player')}
+            maximized={maximizedApp === 'music-player'}
+            zIndex={getZIndex('music-player')}
+          />
+        );
+      case 'video-player':
+        return (
+          <VideoPlayer
+            key="video-player"
+            videoFileName={videoFileName}
+            onClose={() => handleCloseApp('video-player')}
+            onMaximize={() => handleMaximize('video-player')}
+            maximized={maximizedApp === 'video-player'}
+            zIndex={getZIndex('video-player')}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
   const [bluetoothEnabled, setBluetoothEnabled] = useState(true);
   const [pairedDevices, setPairedDevices] = useState([
     { name: 'PlayStation 5 Controller', type: 'Game Controller', battery: 85, connected: true },
@@ -203,7 +528,6 @@ export function App() {
   setAccentColor(accentMap[id] ?? '#A8D5BA');
   };
 
-
   return (
     <div className={`w-full min-h-screen ${darkMode ? 'dark' : ''}`}>
       {currentScreen === 'bios' && <BIOSScreen onContinue={() => setCurrentScreen('boot')} />}
@@ -222,6 +546,19 @@ export function App() {
           maximizedApp={maximizedApp}
           cloudOSDriveIslandEnabled={cloudOSDriveIslandEnabled}
         />
+        {/* System Tray - rendered at app level to respond to window state independently */}
+        <SystemTray 
+          onQuickSettingsClick={() => setShowQuickSettings(true)} 
+          onNotificationsClick={() => setShowNotifications(true)} 
+          notificationCount={3}
+          hasOpenWindows={maximizedApp !== null}
+        />
+        {/* Dock - hidden when window is maximized */}
+        {maximizedApp === null && <Dock onAppClick={handleAppOpen} trashCount={trashCount} />}
+        {/* Backdrop blur overlay when windows are open */}
+        {openApps.length > 0 && (
+          <div className="fixed inset-0 backdrop-blur-sm z-[35] pointer-events-none" />
+        )}
         {showQuickSettings && (
           <QuickSettings
             onClose={() => setShowQuickSettings(false)}
@@ -239,189 +576,8 @@ export function App() {
         )}
         {showNotifications && <Notifications onClose={() => setShowNotifications(false)} />}
         {showLauncher && <Launcher onClose={() => setShowLauncher(false)} onAppOpen={handleAppOpen} onLogout={handleLogout} onSwitchUser={handleSwitchUser} onSleep={handleSleep} onShutdown={handleShutdown} />}
-        {openApps.includes('files') && <FileManager 
-          onClose={() => { handleCloseApp('files'); setFileManagerCategory('home'); }} 
-          initialCategory={fileManagerCategory} 
-          onOpenPhoto={handleOpenPhoto} 
-          onOpenNote={handleOpenNote} 
-          onOpenPDF={handleOpenPDF} 
-          onOpenDocument={handleOpenDocument}
-          onOpenMusic={handleOpenMusic}
-          onOpenVideo={handleOpenVideo}
-          onMaximize={() => handleMaximize('files')}
-          maximized={maximizedApp === 'files'}
-          zIndex={getZIndex('files')}
-        />}
-        {openApps.includes('photos') && <Photos 
-          onClose={() => handleCloseApp('photos')} 
-          initialFolder={photoFolder}
-          onMaximize={() => handleMaximize('photos')}
-          maximized={maximizedApp === 'photos'}
-          zIndex={getZIndex('photos')}
-        />}
-        {openApps.includes('notes') && <Notes 
-          onClose={() => handleCloseApp('notes')} 
-          initialContent={noteContent} 
-          initialTitle={noteTitle}
-          onMaximize={() => handleMaximize('notes')}
-          maximized={maximizedApp === 'notes'}
-          zIndex={getZIndex('notes')}
-        />}
-        {openApps.includes('calculator') && <Calculator 
-          onClose={() => handleCloseApp('calculator')} 
-          onMaximize={() => handleMaximize('calculator')}
-          maximized={maximizedApp === 'calculator'}
-          zIndex={getZIndex('calculator')}
-        />}
-        {openApps.includes('pdf-viewer') && <PDFViewer 
-          onClose={() => handleCloseApp('pdf-viewer')} 
-          fileName={pdfFileName}
-          onMaximize={() => handleMaximize('pdf-viewer')}
-          maximized={maximizedApp === 'pdf-viewer'}
-          zIndex={getZIndex('pdf-viewer')}
-        />}
-        {openApps.includes('document-viewer') && <DocumentViewer 
-          onClose={() => handleCloseApp('document-viewer')} 
-          fileName={documentFileName}
-          onMaximize={() => handleMaximize('document-viewer')}
-          maximized={maximizedApp === 'document-viewer'}
-          zIndex={getZIndex('document-viewer')}
-        />}
-        {openApps.includes('device-manager') && <DeviceManager 
-          onClose={() => handleCloseApp('device-manager')} 
-          onMaximize={() => handleMaximize('device-manager')}
-          maximized={maximizedApp === 'device-manager'}
-          zIndex={getZIndex('device-manager')}
-        />}
-        {openApps.includes('process-manager') && <ProcessManager 
-          onClose={() => handleCloseApp('process-manager')} 
-          onMaximize={() => handleMaximize('process-manager')}
-          maximized={maximizedApp === 'process-manager'}
-          zIndex={getZIndex('process-manager')}
-        />}
-        {openApps.includes('memory-manager') && <MemoryManager 
-          onClose={() => handleCloseApp('memory-manager')} 
-          onMaximize={() => handleMaximize('memory-manager')}
-          maximized={maximizedApp === 'memory-manager'}
-          zIndex={getZIndex('memory-manager')}
-        />}
-        {openApps.includes('storage-manager') && <StorageManager 
-          onClose={() => handleCloseApp('storage-manager')} 
-          onMaximize={() => handleMaximize('storage-manager')}
-          maximized={maximizedApp === 'storage-manager'}
-          zIndex={getZIndex('storage-manager')}
-        />}
-        {openApps.includes('settings') && <Settings 
-          onClose={() => handleCloseApp('settings')} 
-          onOpenStorageManager={() => setOpenApps(prev => prev.includes('storage-manager') ? prev : [...prev, 'storage-manager'])} 
-          onOpenTerminal={() => setOpenApps(prev => prev.includes('terminal') ? prev : [...prev, 'terminal'])}
-          darkMode={darkMode}
-          onDarkModeChange={setDarkMode}
-          accentColor={accentColor}
-          onAccentColorChange={setAccentColor}
-          selectedWallpaper={selectedWallpaper}
-          onWallpaperChange={handleWallpaperChange}
-          onMaximize={() => handleMaximize('settings')}
-          maximized={maximizedApp === 'settings'}
-          cloudOSDriveIslandEnabled={cloudOSDriveIslandEnabled}
-          onCloudOSDriveIslandChange={setCloudOSDriveIslandEnabled}
-          wifiEnabled={wifiEnabled}
-          onWifiChange={setWifiEnabled}
-          zIndex={getZIndex('settings')}
-          bluetoothEnabled={bluetoothEnabled}
-          onBluetoothChange={setBluetoothEnabled}
-          pairedDevices={pairedDevices}
-          onPairedDevicesChange={setPairedDevices}
-        />}
-        {openApps.includes('terminal') && <Terminal 
-          onClose={() => handleCloseApp('terminal')} 
-          onMaximize={() => handleMaximize('terminal')}
-          maximized={maximizedApp === 'terminal'}
-          zIndex={getZIndex('terminal')}
-        />}
-        {openApps.includes('app-store') && <AppStore 
-          onClose={() => handleCloseApp('app-store')} 
-          onMaximize={() => handleMaximize('app-store')}
-          maximized={maximizedApp === 'app-store'}
-          zIndex={getZIndex('app-store')}
-        />}
-        {openApps.includes('game-mode') && <GameMode 
-          onClose={() => handleCloseApp('game-mode')} 
-          onMaximize={() => handleMaximize('game-mode')}
-          maximized={maximizedApp === 'game-mode'}
-          zIndex={getZIndex('game-mode')}
-          bluetoothEnabled={bluetoothEnabled}
-          controllers={pairedDevices}
-          onToggleController={(name) => {
-            setPairedDevices(prev =>
-              prev.map(d =>
-                d.name === name
-                  ? { ...d, connected: !d.connected }
-                  : d
-              )
-            );
-          }}
-        />}
-        {openApps.includes('cloud-drive') && <CloudDrive 
-          onClose={() => handleCloseApp('cloud-drive')}
-          zIndex={getZIndex('cloud-drive')}
-        />}
-        {openApps.includes('trash') && (
-          <Trash
-            onClose={() => handleCloseApp('trash')}
-            onMaximize={() => handleMaximize('trash')}
-            maximized={maximizedApp === 'trash'}
-            zIndex={getZIndex('trash')}
-          />
-        )}
-        {openApps.includes('game-library') && (
-          <GameLibrary
-            onClose={() => handleCloseApp('game-library')}
-            onMaximize={() => handleMaximize('game-library')}
-            maximized={maximizedApp === 'game-library'}
-            onPlayGame={(gameName) => {
-              setSelectedGameTitle(gameName);
-              setOpenApps(prev => prev.includes('game') ? prev : [...prev, 'game']);
-              setMaximizedApp('game');
-            }}
-            zIndex={getZIndex('game-library')}
-          />
-        )}
-        {openApps.includes('browser') && (
-          <Browser
-            wifiEnabled={wifiEnabled}
-            onClose={() => handleCloseApp('browser')}
-            onMaximize={() => handleMaximize('browser')}
-            maximized={maximizedApp === 'browser'}
-            zIndex={getZIndex('browser')}
-          />
-        )}
-        {openApps.includes('game') && (
-          <Game
-            gameTitle={selectedGameTitle}
-            onClose={() => handleCloseApp('game')}
-            onMaximize={() => handleMaximize('game')}
-            maximized={maximizedApp === 'game'}
-            zIndex={getZIndex('game')}
-          />
-        )}
-        {openApps.includes('music-player') && (
-          <MusicPlayer
-            onClose={() => handleCloseApp('music-player')}
-            onMaximize={() => handleMaximize('music-player')}
-            maximized={maximizedApp === 'music-player'}
-            zIndex={getZIndex('music-player')}
-          />
-        )}
-        {openApps.includes('video-player') && (
-          <VideoPlayer
-            videoFileName={videoFileName}
-            onClose={() => handleCloseApp('video-player')}
-            onMaximize={() => handleMaximize('video-player')}
-            maximized={maximizedApp === 'video-player'}
-            zIndex={getZIndex('video-player')}
-          />
-        )}
+        {/* Render windows in openApps order for correct DOM stacking */}
+        {openApps.map(app => renderWindow(app))}
       </>}
     </div>
   );

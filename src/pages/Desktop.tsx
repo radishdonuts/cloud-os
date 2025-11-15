@@ -1,7 +1,5 @@
 import React, { useMemo } from 'react';
 import { CloudDriveIsland } from '../components/desktop/CloudDriveIsland';
-import { Dock } from '../components/desktop/Dock';
-import { SystemTray } from '../components/desktop/SystemTray';
 import { AppIcon } from '../components/desktop/AppIcon';
 import { CloudIcon } from '../components/ui/CloudIcon';
 import { FolderIcon, FileTextIcon, ImageIcon, GamepadIcon } from 'lucide-react';
@@ -121,11 +119,5 @@ export function Desktop({
       <div className="relative z-10 p-8 grid grid-cols-8 gap-4 content-start">
         {desktopApps.map((app, i) => <AppIcon key={i} name={app.name} icon={app.icon} emoji={app.emoji} image={app.image} onClick={app.action} />)}
       </div>
-
-      {/* System Tray */}
-      <SystemTray onQuickSettingsClick={onQuickSettingsOpen} onNotificationsClick={onNotificationsOpen} notificationCount={3} maximizedApp={maximizedApp} />
-
-      {/* Dock */}
-      <Dock onAppClick={onAppOpen} trashCount={trashCount} />
     </div>;
 }
