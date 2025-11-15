@@ -189,17 +189,6 @@ export function Dock({
             Trash
           </div>
         </button>
-
-        {/* App Grid */}
-        <button onClick={() => onAppClick('app-grid')} className="group relative w-14 h-14 rounded-cloud-lg bg-cloud-gray/30 dark:bg-dark-bg-lighter/60 hover:bg-cloud-gray/50 dark:hover:bg-dark-bg-lighter hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center">
-          <span
-            className="absolute inset-0 rounded-cloud-lg bg-white/40 dark:bg-dark-bg-light/40 blur-xl opacity-0 group-hover:opacity-100 transition-all duration-300 after:content-[''] after:absolute after:inset-0 after:rounded-cloud-lg after:bg-white/20 after:blur-3xl after:opacity-0 group-hover:after:opacity-80 after:transition-all after:duration-500"
-          />
-          <Grid3x3Icon size={24} className="text-cloud-gray-deeper dark:text-dark-text" />
-          <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-3 py-1 bg-dark-bg-light text-white text-xs rounded-cloud opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-            All Apps
-          </div>
-        </button>
       </div>
     </div>;
 }
