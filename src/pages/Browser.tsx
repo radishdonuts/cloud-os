@@ -35,7 +35,7 @@ export function Browser({ wifiEnabled, onClose, onMaximize, maximized, zIndex = 
   };
 
   const renderSearchBar = () => (
-    <div className="w-full bg-white/80 dark:bg-dark-bg-light/80 border-t border-cloud-gray/20 dark:border-dark-border p-4">
+    <div className="w-full bg-white/80 dark:bg-dark-bg-light/80 border-t border-cloud-gray/20 dark:border-dark-border px-4 py-1.5">
       <form onSubmit={(e) => { e.preventDefault(); handleSearch(searchQuery); }} className="flex gap-2 max-w-2xl mx-auto">
         <input
           type="text"
@@ -61,18 +61,14 @@ export function Browser({ wifiEnabled, onClose, onMaximize, maximized, zIndex = 
         {wifiEnabled ? (
           <>
             {/* Main Content */}
-            <div className="flex-1 flex flex-col items-center justify-center p-8 overflow-auto">
+            <div className={`flex-1 flex flex-col items-center justify-center overflow-auto ${currentPage === 'home' ? 'p-0' : 'p-8'}`}>
               {currentPage === 'home' && (
-                <div className="flex flex-col items-center justify-center h-full">
-                  <Globe size={64} className="text-cloud-blue mb-4" />
-                  <h2 className="text-3xl font-bold mb-2">Strato Browser</h2>
-                  <p className="text-cloud-gray-dark mb-6">This is a simulated browser for CloudOS. Try searching for something.</p>
-                  <div className="w-full max-w-xl bg-white/80 dark:bg-dark-bg-light/80 rounded-cloud-lg shadow-cloud p-6">
-                    <div className="text-cloud-gray-dark text-center">
-                      <p className="font-semibold mb-2">Welcome to Strato!</p>
-                      <p className="text-sm">Use the search bar below to browse simulated results.</p>
-                    </div>
-                  </div>
+                <div className="flex flex-col items-center justify-center h-full w-full">
+                  <img 
+                    src="/icons/StratoBrowser.png" 
+                    alt="Strato Browser" 
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               )}
 
@@ -121,10 +117,10 @@ export function Browser({ wifiEnabled, onClose, onMaximize, maximized, zIndex = 
             </div>
 
             {/* Navigation Bar */}
-            <div className="flex items-center gap-2 bg-white/80 dark:bg-dark-bg-light/80 border-t border-cloud-gray/20 dark:border-dark-border px-4 py-2">
+            <div className="flex items-center gap-2 bg-white/80 dark:bg-dark-bg-light/80 border-t border-cloud-gray/20 dark:border-dark-border px-4 py-1">
               <button
                 onClick={handleGoHome}
-                className="p-2 rounded-cloud hover:bg-cloud-gray/20 dark:hover:bg-dark-bg-lighter transition-colors text-cloud-blue hover:text-cloud-blue-dark"
+                className="p-1.5 rounded-cloud hover:bg-cloud-gray/20 dark:hover:bg-dark-bg-lighter transition-colors text-cloud-blue hover:text-cloud-blue-dark"
                 title="Go Home"
               >
                 <Home size={20} />

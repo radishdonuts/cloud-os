@@ -74,7 +74,7 @@ export function App() {
         { name: 'Documents', type: 'folder', icon: 'folder', image: '/icons/Folder2.png' },
         { name: 'Projects', type: 'folder', icon: 'folder', image: '/icons/Folder2.png' },
         { name: 'Photos', type: 'app', icon: 'image', image: '/icons/Frame.png' },
-        { name: 'Work Notes', type: 'file', icon: 'note', image: '/icons/Note.png' }
+        { name: 'Work Notes', type: 'file', icon: 'note', image: '/icons/NotesIcon.png' }
       ],
       notes: [
         { title: 'Work Notes', content: 'Meeting with team at 3 PM\nReview project proposals\nUpdate documentation' },
