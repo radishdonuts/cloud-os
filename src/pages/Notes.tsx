@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Window } from '../components/layout/Window';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
+import { Note, User, defaultUser } from '../Interfaces';
 import { PlusIcon, TrashIcon, FileTextIcon, BoldIcon, ItalicIcon, UnderlineIcon, ListIcon, SaveIcon } from 'lucide-react';
+import { firebase } from '../firebase';
 export interface NotesProps {
   onClose: () => void;
   onMaximize?: () => void;
@@ -12,14 +14,7 @@ export interface NotesProps {
   initialTitle?: string;
   zIndex?: number;
 }
-interface Note {
-  id: string;
-  title: string;
-  content: string;
-  modified: string;
-  fontSize: number;
-  fontFamily: string;
-}
+
 export function Notes({
   onClose,
   onMaximize,
@@ -28,28 +23,7 @@ export function Notes({
   initialTitle = 'Untitled',
   zIndex = 40
 }: NotesProps) {
-  const [notes, setNotes] = useState<Note[]>([{
-    id: '1',
-    title: 'Meeting Notes',
-    content: 'Discuss Q4 goals and project timeline...',
-    modified: 'Today',
-    fontSize: 16,
-    fontFamily: 'sans'
-  }, {
-    id: '2',
-    title: 'Shopping List',
-    content: 'Milk, Eggs, Bread, Coffee...',
-    modified: 'Yesterday',
-    fontSize: 16,
-    fontFamily: 'sans'
-  }, {
-    id: '3',
-    title: 'Ideas',
-    content: 'New app features to implement...',
-    modified: 'Last week',
-    fontSize: 16,
-    fontFamily: 'sans'
-  }]);
+  const [notes, setNotes] = useState<Note[]>([]);
   const [selectedNote, setSelectedNote] = useState<Note | null>(initialContent ? {
     id: 'temp',
     title: initialTitle,
@@ -58,6 +32,18 @@ export function Notes({
     fontSize: 16,
     fontFamily: 'sans'
   } : notes[0]);
+  const [currentUser, setCurrentUser] = useState<User>(defaultUser)
+  useEffect(() => {
+    firebase.getUser(localStorage.getItem("currentUser") ?? "").then(user => {
+      if (user) {
+        setCurrentUser(user);
+        setNotes(user.notes);
+        setSelectedNote(notes[0]|| null);
+      }else {
+        alert("no user!");
+      }
+    })
+  }, []);
   const [editingTitle, setEditingTitle] = useState(false);
   const [isSaved, setIsSaved] = useState(true);
   const handleCreateNote = () => {
@@ -70,11 +56,15 @@ export function Notes({
       fontFamily: 'sans'
     };
     setNotes([newNote, ...notes]);
+    currentUser.notes = [newNote, ...notes];
+    firebase.updateUser(currentUser);
     setSelectedNote(newNote);
     setIsSaved(true);
   };
   const handleDeleteNote = (noteId: string) => {
     setNotes(notes.filter(n => n.id !== noteId));
+    currentUser.notes = notes.filter(n => n.id !== noteId);
+    firebase.updateUser(currentUser)
     if (selectedNote?.id === noteId) {
       setSelectedNote(notes[0] || null);
     }
@@ -125,10 +115,13 @@ export function Notes({
       };
       setSelectedNote(updatedNote);
       setNotes(notes.map(n => n.id === selectedNote.id ? updatedNote : n));
+      currentUser.notes = notes.map(n => n.id === selectedNote.id ? updatedNote : n);
+      firebase.updateUser(currentUser);
       setIsSaved(true);
       // Simulate saving only (no download)
     }
   };
+
   return <div className="fixed inset-0 z-40 flex items-center justify-center p-6 bg-black/20 backdrop-blur-sm animate-fade-in">
       <Window title="Notes" onClose={onClose} onMaximize={onMaximize} maximized={maximized} zIndex={zIndex} width="w-full max-w-6xl" height="h-[85vh]">
         <div className="flex h-full">

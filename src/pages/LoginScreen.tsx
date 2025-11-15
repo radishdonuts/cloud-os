@@ -3,7 +3,8 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { CloudIcon } from '../components/ui/CloudIcon';
 import { PowerIcon, KeyboardIcon, EyeIcon, EyeOffIcon, ArrowLeftIcon, PlusIcon } from 'lucide-react';
-import { User } from '../App';
+import { User } from '../Interfaces';
+import { firebase } from '../firebase';
 
 export function LoginScreen({
   users,
@@ -21,7 +22,15 @@ export function LoginScreen({
 
   const handleLogin = () => {
     if (selectedUser) {
-      onLogin(selectedUser);
+      firebase.login(selectedUser?.name, password).then(result => {
+        console.log(result);
+        if (result && selectedUser) {
+          localStorage.setItem('currentUser', selectedUser.name);
+          onLogin(selectedUser);
+        }else {
+          alert("Wrong Password!");
+        }
+      })
     }
   };
 

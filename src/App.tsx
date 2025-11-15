@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BIOSScreen } from './pages/BIOSScreen';
 import { BootScreen } from './pages/BootScreen';
 import { LoginScreen } from './pages/LoginScreen';
@@ -26,29 +26,12 @@ import { Trash } from './pages/Trash';
 import { GameLibrary } from './pages/GameLibrary';
 import { Browser } from './pages/Browser';
 import { Game } from './pages/Game';
+import { User, defaultNote } from './Interfaces';
+import { firebase } from './firebase';
 
 type Screen = 'bios' | 'boot' | 'login' | 'account-creation' | 'desktop';
 type App = 'files' | 'photos' | 'notes' | 'pdf-viewer' | 'document-viewer' | 'device-manager' | 'process-manager' | 'memory-manager' | 'storage-manager' | 'settings' | 
 'app-store' | 'game-mode' | 'cloud-drive' | 'terminal' | 'calculator' | 'trash' | 'game-library' | 'browser' | 'game' | null;
-export interface User {
-  id: string;
-  name: string;
-  avatar: string;
-  profilePhoto?: string; // Optional profile photo path
-  wallpaper: {
-    gradient: string;
-    accent?: string;
-    image?: string; // Optional wallpaper image
-  };
-  desktopApps: Array<{
-    name: string;
-    type: 'folder' | 'file' | 'app';
-    icon?: string;
-    image?: string; // PNG image path
-  }>;
-  notes: Array<{ title: string; content: string }>;
-  photos: string[];
-}
 
 export function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('bios');
@@ -59,73 +42,12 @@ export function App() {
   const [selectedGameTitle, setSelectedGameTitle] = useState<string>('Genshin Impact');
 
   // User management
-  const [users] = useState<User[]>([
-    {
-      id: '1',
-      name: 'John Doe',
-      avatar: 'JD',
-      profilePhoto: '/icons/tiger1.png', // Add your photo here
-      wallpaper: {
-        gradient: 'from-blue-500 via-blue-400 to-cyan-400',
-        accent: 'blue',
-        image: '/icons/DesktopWallpaper5.png'
-      },
-      desktopApps: [
-        { name: 'Documents', type: 'folder', icon: 'folder', image: '/icons/Folder2.png' },
-        { name: 'Projects', type: 'folder', icon: 'folder', image: '/icons/Folder2.png' },
-        { name: 'Photos', type: 'app', icon: 'image', image: '/icons/Frame.png' },
-        { name: 'Work Notes', type: 'file', icon: 'note', image: '/icons/Note.png' }
-      ],
-      notes: [
-        { title: 'Work Notes', content: 'Meeting with team at 3 PM\nReview project proposals\nUpdate documentation' },
-        { title: 'Todo List', content: '- Finish CloudOS project\n- Review pull requests\n- Update README' }
-      ],
-      photos: ['Vacation 2024', 'Work Events', 'Family']
-    },
-    {
-      id: '2',
-      name: 'Juan Paolo',
-      avatar: 'JP',
-      profilePhoto: '/icons/profile2.jpg', // Add your photo here
-      wallpaper: {
-        gradient: 'from-pink-500 via-purple-500 to-indigo-500',
-        accent: 'purple',
-        image: '/icons/DesktopWallpaper1.jpg'
-      },
-      desktopApps: [
-        { name: 'Design Files', type: 'folder', icon: 'folder', image: '/icons/Folder2.png' },
-        { name: 'Artwork', type: 'folder', icon: 'folder', image: '/icons/Folder2.png' },
-        { name: 'Creative Notes', type: 'file', icon: 'note', image: '/icons/Note.png' }
-      ],
-      notes: [
-        { title: 'Creative Ideas', content: 'New design concepts:\n- Minimalist UI\n- Pastel color scheme\n- Animated transitions' },
-        { title: 'Client Projects', content: 'Website redesign for Client A\nLogo design for Client B\nBrand guidelines update' }
-      ],
-      photos: ['Art Gallery', 'Design Inspiration', 'Portfolio']
-    },
-    {
-      id: '3',
-      name: 'Crispy Pata',
-      avatar: 'CP',
-      profilePhoto: '/icons/profile3.jpg', // Add your photo here
-      wallpaper: {
-        gradient: 'from-green-600 via-emerald-500 to-teal-500',
-        accent: 'green'
-      },
-      desktopApps: [
-        { name: 'Code', type: 'folder', icon: 'folder', image: '/icons/Folder2.png' },
-        { name: 'DevOps', type: 'folder', icon: 'folder', image: '/icons/Folder2.png' },
-        { name: 'Gaming', type: 'app', icon: 'game' },
-        { name: 'Tech Notes', type: 'file', icon: 'note', image: '/icons/Note.png' }
-      ],
-      notes: [
-        { title: 'Crispy Pata', content: 'Docker commands:\ndocker ps\ndocker-compose up\nkubectl get pods' },
-        { title: 'Learning', content: 'Study topics:\n- Kubernetes\n- Rust programming\n- System design patterns' }
-      ],
-      photos: ['Tech Events', 'Gaming Screenshots', 'Hackathons']
-    }
-  ]);
-  
+  const [users, setUsers] = useState<User[]>([]);
+  useEffect(() => {
+    firebase.getUsers().then(users => {
+      setUsers(users);
+    })
+  },[]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [showQuickSettings, setShowQuickSettings] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
